@@ -1,7 +1,11 @@
 import igraph
 from igraph.drawing.colors import color_name_to_rgb
 
-g = igraph.Graph().Erdos_Renyi(n=3000,p=0.05)
+try: 
+  g = igraph.load("graph.graphml")
+except: 
+  print("A")
+  g = igraph.Graph().Erdos_Renyi(n=3000,p=0.05)
 
 # path = g.get_eids(path=g.get_shortest_paths(1,9)[0]) 
 # edge_list = g.get_eids(g.get_edgelist())
@@ -35,3 +39,5 @@ for degree in g.degree():
 visual_style["vertex_label"] = [a for a in range(g.vcount())]
 visual_style["vertex_color"] = colors
 igraph.plot(g, **visual_style)
+
+igraph.save(g, "graph.graphml")

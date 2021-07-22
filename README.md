@@ -11,7 +11,7 @@ This is source code for my engineer degree diploma.
 
 ## TODO
  1. generation
-    - save it to file
+    - ~~save it to file~~
  2. analising
     - load graph 
     - prepare it for finding path - maybe in generation
