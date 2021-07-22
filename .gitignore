@@ -1,6 +1,7 @@
 # User defined 
 .vscode
-*.graphml
+*.txt
+generated.graphml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
