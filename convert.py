@@ -10,7 +10,7 @@ file_name_absolute = os.getcwd() + "\graphs\\" + file_name
 def load_graph(file):
   edges = []
 
-  lines = f.readlines()
+  lines = file.readlines()
 
   nnodes = int(lines[2].split(" ")[2])
   for line in lines[4:]:

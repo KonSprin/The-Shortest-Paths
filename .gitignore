@@ -2,6 +2,7 @@
 .vscode
 *.txt
 generated.graphml
+AS*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

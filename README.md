@@ -9,14 +9,6 @@ This is source code for my engineer degree diploma.
  3. Visualizing graphs along with every path 
  4. Create ML that would find those paths
 
-## TODO
- 1. generation
-    - ~~save it to file~~
- 2. analising
-    - load graph 
-    - prepare it for finding path - maybe in generation
-    - find all the paths 
-
 ## Resources
 1. Science
     - [Routing Algorithm Based on Ant Colony](https://ieeexplore.ieee.org/abstract/document/7862755)
@@ -28,3 +20,5 @@ This is source code for my engineer degree diploma.
     - [igraph tutorial](https://igraph.org/python/doc/tutorial/)
 3. Data
     - [Stanford Large Network Dataset Collection](https://snap.stanford.edu/data/)
+4. Wikipedia
+    - [A* search algorithm](https://en.wikipedia.org/wiki/A*_search_algorithm)
