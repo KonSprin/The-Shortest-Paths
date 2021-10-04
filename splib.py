@@ -1,5 +1,6 @@
 from random import choices
 import logging as log
+from collections import deque
 
 def bellfo(g, start, end):
   n = g.vcount()
@@ -65,8 +66,11 @@ def antss(g, start, end):
   for e in g.es():
     e["pheromone"] = 10
 
+  p = 0.1 # Pheromone evaporation coefficent
+  T = 5 # ammount of pheromone deposited for each transition
+
   for generation in range(10):
-    all_ways = []
+    all_ways = deque() # Using deque insted of normal list becouse prepending to list is super inefficient in large lists
     ants = [Ant(id, start) for id in range(ant_num)]
     while len(ants) > 0:
       # Edge selection for each ant 
@@ -88,9 +92,37 @@ def antss(g, start, end):
 
         # if ant reached goal, remove it from set and remember the path
         if the_way == end:
-          all_ways.append(ant.visited)
+          all_ways.append(deque(ant.visited))
           ants.remove(ant)
-    print(all_ways)
+      
+    # Pheromone update after each generation
+    for way in all_ways:
+      for i in range(len(way) - 1):
+        hop = way[i]
+        next_hop = way[i+1]
+        # g.es(x)["y"] returs one element list so You need to use [0] but in order to write to it You can't do that. It's stupid
+        g.es(g.get_eid(way[i], way[i+1]))["pheromone"] = g.es(g.get_eid(way[i], way[i+1]))["pheromone"][0] * (1 - p) + T
+
+    # print(all_ways)
+  
+  final_way = [start]
+  visited = [start]
+  current = start
+  while final_way[-1] != end:
+    possible_ways = setsub(g.neighbors(current), visited)
+
+    if len(possible_ways) == 0:
+      log.error("Ants got lost! No way from start to end.")
+      return([])
+
+    w_dist = [g.es(g.get_eid(current, w))["pheromone"][0] for w in possible_ways]
+    visited.append(current)
+    current = possible_ways[w_dist.index(max(w_dist))]
+    final_way.append(current)
+  
+  return(final_way)
+
+
 
 
 
