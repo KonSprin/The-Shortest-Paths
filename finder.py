@@ -19,6 +19,7 @@ except FileNotFoundError:
 except :
   log.exception("Could not load graph from file")
 
+
 # %%
 
 start = time.time()
@@ -26,6 +27,7 @@ x = []
 for v in range(graph.vcount()):
     oneloop = time.time()
     x.append(graph.get_shortest_paths(v))
-    log.debug("Loop nr: " + str(v) + " \nTime: " + str(oneloop - time.time()))
-print(start - time.time())
+    log.debug("Loop nr: " + str(v) + " \nTime: " + str(time.time() - oneloop))
+print(time.time() - start)
 
+# %%
