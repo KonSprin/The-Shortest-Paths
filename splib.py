@@ -2,20 +2,27 @@ from random import choices
 import logging as log
 from collections import deque
 
+def setsub(l1, l2):
+  # a function for subtracting lists like sets
+  return list(set(l1) - set(l2))
+
 def bellfo(g, start, end):
-  n = g.vcount()
-  dist = [float("inf")] * n
-  predecessor = [[]] * n
+  vn = g.vcount()
+  dist = [float("inf")] * vn
+  predecessor = [[]] * vn 
 
   dist[start] = 0
 
-  for i in range(g.vcount() - 1):
+  for i in range(vn - 1):
     for e in g.es():
-       u = e.source
-       v = e.target
-       if dist[u] + 1 < dist[v]:
-         dist[v] = dist[u] + 1
-         predecessor[v] = u
+      u = e.source
+      v = e.target
+      if dist[u] + e["weight"] < dist[v]:
+        dist[v] = dist[u] + e["weight"]
+        predecessor[v] = u
+      elif dist[v] + e["weight"] < dist[u]:
+        dist[u] = dist[v] + e["weight"]
+        predecessor[u] = v
   
   path = [end]
   while path[-1] != start:
@@ -25,20 +32,29 @@ def bellfo(g, start, end):
 
 
 def dijkstra(g, start, end):
-  dist = []
-  previus = []
-  for v in g.vs():
-    dist.append(float('inf'))
-    previus.append([])
+  vn = g.vcount()
+  dist = [float("inf")] * vn
+  previus = [[]] * vn
+  # for v in g.vs():
+  #   dist.append(float('inf'))
+  #   previus.append([])
 
-  Q = list(range(g.vcount()))
+  Q = list(range(vn))
   
   dist[start] = 0
 
   while len(Q) > 0:
-    u = Q.pop(dist.index(min(dist)))
+    tmp_dist = []
+    for q in range(vn):
+      if q in Q:
+        tmp_dist.append(dist[q])
+      else:
+        tmp_dist.append(float('inf'))
+    
+    u = tmp_dist.index(min(tmp_dist))
+    Q.remove(u)
     for v in g.neighbors(u):
-      alt = dist[u] + 1
+      alt = dist[u] + g.es(g.get_eid(u, v))["weight"][0]
       if alt < dist[v]:
         dist[v] = alt
         previus[v] = u
@@ -56,11 +72,7 @@ class Ant:
     self.position = start
 
 
-def antss(g, start, end):
-  def setsub(l1, l2):
-    # a function for subtracting lists like sets
-    return list(set(l1) - set(l2))
-
+def antss(g, start, end, g_num):
   ant_num = 10 # number of ants in each generation
 
   for e in g.es():
@@ -69,7 +81,7 @@ def antss(g, start, end):
   p = 0.1 # Pheromone evaporation coefficent
   T = 5 # ammount of pheromone deposited for each transition
 
-  for generation in range(10):
+  for generation in range(g_num):
     all_ways = deque() # Using deque insted of normal list becouse prepending to list is super inefficient in large lists
     ants = [Ant(id, start) for id in range(ant_num)]
     while len(ants) > 0:
@@ -84,8 +96,8 @@ def antss(g, start, end):
           continue
         
         # calculation of probability of each way
-        ph_sum = sum([g.es(g.get_eid(ant.position, w))["pheromone"][0] for w in possible_ways])
-        w_dist = [g.es(g.get_eid(ant.position, w))["pheromone"][0]/ph_sum for w in possible_ways]
+        ph_sum = sum([ g.es(g.get_eid(ant.position, w))["pheromone"][0] for w in possible_ways ])
+        w_dist = [ (g.es(g.get_eid(ant.position, w))["pheromone"][0] / g.es(g.get_eid(ant.position, w))["weight"][0] ) / ph_sum for w in possible_ways ]
         the_way = choices(possible_ways, w_dist)[0]
         ant.visited.append(the_way)
         ant.position = the_way
