@@ -1,6 +1,7 @@
 from random import choices
 import logging as log
 from collections import deque
+import igraph as ig
 
 def setsub(l1, l2):
   # a function for subtracting lists like sets
@@ -72,16 +73,18 @@ class Ant:
     self.position = start
 
 
-def antss(g, start, end, g_num):
-  ant_num = 10 # number of ants in each generation
+def antss(g: ig.Graph, start: int, end: int, 
+          number_of_generations=20, number_of_ants=10, pheromone_value=10,
+          ph_evap_coef=0.1, ph_depo=5):
+  ant_num = number_of_ants # number of ants in each generation
 
   for e in g.es():
-    e["pheromone"] = 10
+    e["pheromone"] = pheromone_value
 
-  p = 0.1 # Pheromone evaporation coefficent
-  T = 5 # ammount of pheromone deposited for each transition
+  p = ph_evap_coef # Pheromone evaporation coefficent
+  T = ph_depo # ammount of pheromone deposited for each transition
 
-  for generation in range(g_num):
+  for generation in range(number_of_generations):
     all_ways = deque() # Using deque insted of normal list becouse prepending to list is super inefficient in large lists
     ants = [Ant(id, start) for id in range(ant_num)]
     while len(ants) > 0:
@@ -96,9 +99,19 @@ def antss(g, start, end, g_num):
           continue
         
         # calculation of probability of each way
-        ph_sum = sum([ g.es(g.get_eid(ant.position, w))["pheromone"][0] for w in possible_ways ])
-        w_dist = [ (g.es(g.get_eid(ant.position, w))["pheromone"][0] / g.es(g.get_eid(ant.position, w))["weight"][0] ) / ph_sum for w in possible_ways ]
-        the_way = choices(possible_ways, w_dist)[0]
+        ph_sum = 0
+        way_distribiution_temp = []
+        for way in possible_ways:
+          ph = g.es(g.get_eid(ant.position, way))["pheromone"][0]
+          weight = g.es(g.get_eid(ant.position, way))["weight"][0]
+          ph_sum += ph/weight
+
+          way_distribiution_temp.append(ph/weight)
+        way_distribiution = [w / ph_sum for w in way_distribiution_temp]
+
+        # ph_sum = sum([ g.es(g.get_eid(ant.position, w))["pheromone"][0] for w in possible_ways ])
+        # way_distribiution = [ (g.es(g.get_eid(ant.position, w))["pheromone"][0] / g.es(g.get_eid(ant.position, w))["weight"][0] ) / ph_sum for w in possible_ways ]
+        the_way = choices(possible_ways, way_distribiution)[0]
         ant.visited.append(the_way)
         ant.position = the_way
 
@@ -113,6 +126,7 @@ def antss(g, start, end, g_num):
         hop = way[i]
         next_hop = way[i+1]
         # g.es(x)["y"] returs one element list so You need to use [0] but in order to write to it You can't do that. It's stupid
+        # TODO update T to be Q/Lk - Lk is the cost of the kth ant's tour
         g.es(g.get_eid(way[i], way[i+1]))["pheromone"] = g.es(g.get_eid(way[i], way[i+1]))["pheromone"][0] * (1 - p) + T
 
     # print(all_ways)
@@ -127,16 +141,10 @@ def antss(g, start, end, g_num):
       log.error("Ants got lost! No way from start to end.")
       return([])
 
-    w_dist = [g.es(g.get_eid(current, w))["pheromone"][0] for w in possible_ways]
+    way_distribiution = [g.es(g.get_eid(current, w))["pheromone"][0] for w in possible_ways]
     visited.append(current)
-    current = possible_ways[w_dist.index(max(w_dist))]
+    current = possible_ways[way_distribiution.index(max(way_distribiution))]
     final_way.append(current)
   
   return(final_way)
-
-
-
-
-
-
 

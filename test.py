@@ -57,13 +57,19 @@ if True:
   t4 = time()
   print("Ants: " + str(t4 - t3))
 # %%
-if False:
+if True:
   # Accuracy tester for Ants #
   # ~90% for first try at 10 generations with small graph
-  paths = graph.get_all_shortest_paths(0,18)
+  # ~60% first try with bigger graph - 20 nodes\
+
+  # paths = graph.get_all_shortest_paths(0,18)
+  paths = [[0, 3, 16, 12, 15, 18]]
+
+
+  
   print(paths)
 
-  for g_num in range(95,100):
+  for g_num in range(20,45,5):
     hits = 0
     for i in range(100):
       if antss(graph,0,18,g_num) in paths:
