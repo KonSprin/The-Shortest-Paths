@@ -5,9 +5,11 @@ import logging as log
 from splib import *
 from time import time
 
+# remember to set level to WARNING before actual tests!
 log.basicConfig(level=log.DEBUG,
                 filename='sp.log', filemode='w', 
                 format='%(levelname)s: %(module)s %(asctime)s %(message)s')
+LOG = log.getLogger()
 
 graph_name = "graphs/basic.graphml"
 
@@ -53,23 +55,28 @@ if True:
   t3 = time()
   print("Dijkstra: " + str(t3 - t2))
 
-  print (antss(graph,0,18,30))
+  print (antss(graph,0,18,30, weight_influence=0))
   t4 = time()
   print("Ants: " + str(t4 - t3))
+
+  LOG.setLevel(log.ERROR)
+  print (antss(graph,0,18,30, weight_influence=0))
+  t5 = time()
+  print("Ants with ERROR log: " + str(t5 - t4))
 # %%
 if True:
+  LOG.setLevel(log.ERROR)
   # Accuracy tester for Ants #
   # ~90% for first try at 10 generations with small graph
   # ~60% first try with bigger graph - 20 nodes\
+  # back to ~90% for bigger graph after some adjustements 
 
   # paths = graph.get_all_shortest_paths(0,18)
   paths = [[0, 3, 16, 12, 15, 18]]
 
-
-  
   print(paths)
 
-  for g_num in range(20,45,5):
+  for g_num in range(30,45,5):
     hits = 0
     for i in range(100):
       if antss(graph,0,18,g_num) in paths:
