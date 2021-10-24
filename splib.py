@@ -55,7 +55,8 @@ def dijkstra(g, start, end):
     u = tmp_dist.index(min(tmp_dist))
     Q.remove(u)
     for v in g.neighbors(u):
-      alt = dist[u] + g.es(g.get_eid(u, v))["weight"][0]
+      eid = g.get_eid(u, v)
+      alt = dist[u] + g.es(eid)["weight"][0]
       if alt < dist[v]:
         dist[v] = alt
         previus[v] = u
@@ -75,11 +76,11 @@ class Ant:
 
 
 def antss(g: ig.Graph, start: int, end: int, 
-          number_of_generations=20, number_of_ants=5,
+          number_of_generations=20, number_of_ants=50,
           ph_evap_coef=0.1, ph_deposition=5,
           ph_influence=1, weight_influence=1):
   ''' 
-  This functio implements the Ant colony algorithm inspired by Ants
+  This function implements the Ant colony algorithm inspired by Ants
     Each generation some number of ants is released. 
     Each ant tries to reach the goal by following the pheromone
 
