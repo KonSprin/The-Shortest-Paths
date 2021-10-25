@@ -1,5 +1,4 @@
 # %%
-from os import path
 import igraph as ig 
 import logging as log
 from splib import *

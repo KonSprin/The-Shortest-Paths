@@ -4,7 +4,8 @@
          xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns
          http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
 <!-- Created by igraph -->
-  <graph id="G" edgedefault="directed">
+  <graph id="G" edgedefault="vnum = int(width*height/(step*step))
+graph = ig.Graph(vnum)directed">
     <node id="n0">
     </node>
     <node id="n1">
