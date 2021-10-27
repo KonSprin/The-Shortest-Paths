@@ -43,17 +43,17 @@ if False:
   except :
     log.exception("Could not load graph from file")
 else: 
-  graph = ig.Graph.K_Regular(5000,3)
+  graph = ig.Graph.K_Regular(800,3)
   for e in graph.es():
     e["weight"] = randint(1,10)
 
 if True:
   t_start = time()
-  print(graph.get_all_shortest_paths(0,18))
+  print(graph.get_all_shortest_paths(0,108))
   t1 = time()
   print("Igraph default: " + str(t1 - t_start))
 
-  print (bellfo(graph,0,18))
+  print (bellfo(graph,0,108))
   t2 = time()
   print("Bellman-Ford: " + str(t2 - t1))
 
@@ -61,12 +61,12 @@ if True:
   t3 = time()
   print("Dijkstra: " + str(t3 - t2))
 
-  print (antss(graph,0,18,30))
+  print (antss(graph,0,108,30))
   t4 = time()
   print("Ants: " + str(t4 - t3))
 
   LOG.setLevel(log.ERROR)
-  print (antss(graph,0,18,30))
+  print (antss(graph,0,108,30))
   t5 = time()
   print("Ants with ERROR log: " + str(t5 - t4))
 # %%
