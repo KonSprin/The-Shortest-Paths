@@ -135,17 +135,6 @@ def antss(g: ig.Graph, start: int, end: int,
   
   return(final_path)
 
-def pheromone_update(g, ph_evap_coef, ph_deposition, all_paths, all_paths_weight):
-  for path, weight in zip(all_paths, all_paths_weight):
-    length = len(path)
-    for i in range(length - 1):
-      hop = path[i]
-      next_hop = path[i+1]
-      # g.es(x)["y"] returs one element list so You need to use [0] but in order to write to it You can't do that. It's stupid
-      g.es(g.get_eid(hop, next_hop))["pheromone"] = g.es(g.get_eid(hop, next_hop))["pheromone"][0] * (1 - ph_evap_coef) + ph_deposition/weight
-  
-  return g
-
 def ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influence):
   all_paths = []
   all_paths_weight = []
@@ -167,7 +156,7 @@ def ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influ
       way_distribiution_temp = []
       for way in possible_ways:
         ph = g.es(g.get_eid(ant.position, way))["pheromone"][0] ** ph_influence
-        weight = g.es(g.get_eid(ant.position, way))["weight"][0] ** weight_influence
+        weight = g.vs[way]["distance"] ** weight_influence
         ph_sum += ph/weight
 
         way_distribiution_temp.append(ph/weight)
@@ -176,7 +165,7 @@ def ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influ
       # ph_sum = sum([ g.es(g.get_eid(ant.position, w))["pheromone"][0] for w in possible_ways ])
       # way_distribiution = [ (g.es(g.get_eid(ant.position, w))["pheromone"][0] / g.es(g.get_eid(ant.position, w))["weight"][0] ) / ph_sum for w in possible_ways ]
       the_way = choices(possible_ways, way_distribiution)[0] # a way chosen by ant based on pheromone and weight 
-      ant.weight_sum = ant.weight_sum + g.es(g.get_eid(ant.position, the_way))["weight"][0]
+      ant.weight_sum = ant.weight_sum + g.vs[the_way]["distance"]
       ant.visited.append(the_way)
       ant.position = the_way
 
@@ -188,3 +177,20 @@ def ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influ
         ants.remove(ant)
   return all_paths,all_paths_weight
 
+def pheromone_update(g, ph_evap_coef, ph_deposition, all_paths, all_paths_weight):
+  for e in g.es():
+    e["ph_update"] = 0
+
+  for path, weight in zip(all_paths, all_paths_weight):
+    length = len(path)
+    for i in range(length - 1):
+      hop = path[i]
+      next_hop = path[i+1]
+      # g.es(x)["y"] returs one element list so You need to use [0] but in order to write to it You can't do that. It's stupid
+      # g.es(g.get_eid(hop, next_hop))["pheromone"] = g.es(g.get_eid(hop, next_hop))["pheromone"][0] * (1 - ph_evap_coef) + ph_deposition/weight
+      g.es(g.get_eid(hop, next_hop))["ph_update"] = g.es(g.get_eid(hop, next_hop))["ph_update"][0] + ph_deposition/weight
+  
+  for e in g.es():
+    e["pheromone"] = e["pheromone"] * (1 - ph_evap_coef) + e["ph_update"]
+  
+  return g
