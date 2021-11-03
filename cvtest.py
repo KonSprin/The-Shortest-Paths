@@ -42,6 +42,31 @@ def vid2wh(v, width):
 def wh2vid(w, h, width):
     vid = h * width + w
     return vid
+
+def draw_line(x0, y0, x1, y1):
+  line=[(x0, y0)]
+  dx = np.abs(x1-x0)
+  sx = 1 if x0 < x1 else -1
+  dy = -np.abs(y1-y0)
+  sy = 1 if y0 < y1 else -1
+  err = dx + dy
+
+  while not ((x0 == x1) & (y0 == y1)):
+    e2 = err * 2
+
+    if e2 > dy:
+      err += dy
+      x0 += sx
+      line.append((x0,y0))
+    elif e2 < dx:
+      err += dx
+      y0 += sy
+      line.append((x0,y0))
+    # print (x0,y0)
+  return line
+    
+  
+
 # %%
 
 width = 60
@@ -53,7 +78,12 @@ frame_height = height * step
 graph = generate_graph(width, height)
 
 # %%
-img = np.ones((frame_height,frame_width,1), np.uint8)*255
+img = np.zeros((frame_height,frame_width,1), np.uint32)
+
+for w,h in draw_line(30,2,30,33):
+  graph.delete_edges(graph.incident(wh2vid(w,h,width)))
+  img[h*step:h*step+step,w*step:w*step+step] = 255
+
 
 path = graph.get_shortest_paths(1,100)
 print(path)
@@ -99,7 +129,7 @@ while True:
   #     update_frame(width, step, v, frame, 10)
 
   # tmp_frame = np.zeros((frame_height,frame_width,1), np.uint8)
-  frame = np.zeros((frame_height,frame_width,1), np.uint32)
+  frame = img
 
   for e in graph.es():
     s = e.source
