@@ -43,32 +43,45 @@ if False:
   except :
     log.exception("Could not load graph from file")
 else: 
-  graph = ig.Graph.K_Regular(800,3)
+  width = 20
+  height = 20
+
+  start = wh2vid(1,1, width)
+  end =  wh2vid(18,19, width)
+
+  graph = generate_graph(width, height)
+
+  for v in graph.vs():
+    v["distance"] = np.linalg.norm(np.array(vid2wh(v.index, width)) - np.array(vid2wh(end, width)))
+  graph.vs[end]["distance"] = 0.1
+
   for e in graph.es():
-    e["weight"] = randint(1,10)
+      e["weight"] = graph.vs[e.target]["distance"]
+  ig.save(graph, "graphs/basic.graphml")
 
 if True:
-  t_start = time()
-  print(graph.get_all_shortest_paths(0,108))
-  t1 = time()
-  print("Igraph default: " + str(t1 - t_start))
+  target = end
+  
+  timer = Timer()
+  print(graph.get_shortest_paths(0,target))
+  print("Igraph default: " + str(timer.time()))
 
-  print (bellfo(graph,0,108))
-  t2 = time()
-  print("Bellman-Ford: " + str(t2 - t1))
+  print (bellfo(graph,0,target))
+  print("Bellman-Ford: " + str(timer.time()))
 
-  # print (dijkstra(graph,0,18))
-  t3 = time()
-  print("Dijkstra: " + str(t3 - t2))
+  print (dijkstra(graph,0,target))
+  print("Dijkstra: " + str(timer.time()))
 
-  print (antss(graph,0,108,30))
-  t4 = time()
-  print("Ants: " + str(t4 - t3))
+  print (Astar(graph,0,target))
+  print("A*: " + str(timer.time()))
 
-  LOG.setLevel(log.ERROR)
-  print (antss(graph,0,108,30))
-  t5 = time()
-  print("Ants with ERROR log: " + str(t5 - t4))
+  print (antss(graph,0,target,30))
+  print("Ants: " + str(timer.time()))
+
+  # LOG.setLevel(log.ERROR)
+  # print (antss(graph,0,108,30))
+  # t5 = time()
+  # print("Ants with ERROR log: " + str(t5 - t4))
 # %%
 if False:
   LOG.setLevel(log.ERROR)

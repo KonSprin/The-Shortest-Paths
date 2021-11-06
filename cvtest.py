@@ -11,62 +11,6 @@ log.basicConfig(level=log.DEBUG,
                 filename='sp.log', filemode='w', 
                 format='%(levelname)s: %(module)s %(asctime)s %(message)s')
 
-def generate_edge_list(width, height):
-  edges = []
-  for h in range(height - 1):
-    for w in range(width - 1):
-      vid = wh2vid(w, h, width)
-      edges.append((vid,vid + 1))
-      edges.append((vid,vid + width))
-    vid += 1
-    edges.append((vid, vid + width))
-  for w in range(width-1):
-    vid = width*height - width + w
-    edges.append((vid, vid + 1))
-  return edges
-    
-def generate_graph(width, height):
-  vnum = int(width*height)
-  graph = ig.Graph(vnum)
-
-  edges = generate_edge_list(width, height)
-  graph.add_edges(edges)
-
-  return graph
-
-def vid2wh(v, width):
-  w = (v % width)
-  h = floor(v/width)
-  return w,h
-
-def wh2vid(w, h, width):
-    vid = h * width + w
-    return vid
-
-def draw_line(x0, y0, x1, y1):
-  line=[(x0, y0)]
-  dx = np.abs(x1-x0)
-  sx = 1 if x0 < x1 else -1
-  dy = -np.abs(y1-y0)
-  sy = 1 if y0 < y1 else -1
-  err = dx + dy
-
-  while not ((x0 == x1) & (y0 == y1)):
-    e2 = err * 2
-
-    if e2 > dy:
-      err += dy
-      x0 += sx
-      line.append((x0,y0))
-    elif e2 < dx:
-      err += dx
-      y0 += sy
-      line.append((x0,y0))
-    # print (x0,y0)
-  return line
-    
-  
-
 # %%
 
 width = 60
@@ -80,7 +24,11 @@ graph = generate_graph(width, height)
 # %%
 img = np.zeros((frame_height,frame_width,1), np.uint32)
 
-for w,h in draw_line(30,2,30,33):
+for w,h in draw_line(10,2,30,33):
+  graph.delete_edges(graph.incident(wh2vid(w,h,width)))
+  img[h*step:h*step+step,w*step:w*step+step] = 255
+
+for w,h in draw_line(40,39, 50, 30):
   graph.delete_edges(graph.incident(wh2vid(w,h,width)))
   img[h*step:h*step+step,w*step:w*step+step] = 255
 
@@ -96,12 +44,9 @@ print(path)
 # cv2.waitKey(0)
 
 # %%
-# Initial value of pheromone on each edge 
-for e in graph.es():
-  e["pheromone"] = 1
 
 start = wh2vid(3,20, width)
-end =  wh2vid(55,30, width)
+end =  wh2vid(25,30, width)
 number_of_ants = 100
 ph_influence = 1
 weight_influence = 3
@@ -109,8 +54,13 @@ ph_evap_coef=0.01
 ph_deposition=8000
 
 for v in graph.vs():
-  v["distance"] = np.linalg.norm(np.array(vid2wh(v.index, width)) - np.array(vid2wh(end, width)))
+  v["distance"] = diag_dist(v.index,end,width)
 graph.vs[end]["distance"] = 0.1
+
+if True:
+  for e in graph.es():
+    e["weight"] = graph.vs[e.target]["distance"]
+  ig.save(graph, "graphs/basic.graphml")
 
 def update_frame(width, step, v, frame, value):
   w, h = [x * step for x in vid2wh(v, width)]
@@ -151,7 +101,7 @@ while True:
   # Display the resulting frame
   cv2.imshow('frame', frame)
   if cv2.waitKey(1) == ord('q'):
-      break
+    break
 
 # When everything done, release the capture
 cv2.destroyAllWindows()

@@ -1,8 +1,9 @@
 from random import choices
 import logging as log
-from collections import deque
 import igraph as ig
 from time import perf_counter as time
+import numpy as np
+from math import floor 
 
 class Timer:
     def __init__(self):
@@ -14,9 +15,88 @@ class Timer:
       self.start = time()
       return elapsed
 
+def generate_edge_list(width, height):
+  edges = []
+  for h in range(height - 1):
+    for w in range(width - 1):
+      vid = wh2vid(w, h, width)
+      edges.append((vid,vid + 1))
+      edges.append((vid,vid + width))
+    vid += 1
+    edges.append((vid, vid + width))
+  for w in range(width-1):
+    vid = width*height - width + w
+    edges.append((vid, vid + 1))
+  
+  return edges
+
+def generate_graph(width, height):
+  vnum = int(width*height)
+  graph = ig.Graph(vnum)
+
+  edges = generate_edge_list(width, height)
+  graph.add_edges(edges)
+
+  graph["width"] = width
+
+  # Initial value of pheromone on each edge 
+  for e in graph.es():
+    e["pheromone"] = 1
+
+  return graph
+
+def draw_line(x0, y0, x1, y1):
+  line=[(x0, y0)]
+  dx = np.abs(x1-x0)
+  sx = 1 if x0 < x1 else -1
+  dy = -np.abs(y1-y0)
+  sy = 1 if y0 < y1 else -1
+  err = dx + dy
+
+  while not ((x0 == x1) & (y0 == y1)):
+    e2 = err * 2
+
+    if e2 > dy:
+      err += dy
+      x0 += sx
+      line.append((x0,y0))
+    elif e2 < dx:
+      err += dx
+      y0 += sy
+      line.append((x0,y0))
+    # print (x0,y0)
+  return line
+
+
+def man_dist(start, goal, width):
+  start_x, start_y = vid2wh(start, width)
+  goal_x, goal_y = vid2wh(goal, width)
+  return abs(start_x - goal_x) + abs(start_y - goal_y)
+
+def diag_dist(start, goal, width):
+  start_x, start_y = vid2wh(start, width)
+  goal_x, goal_y = vid2wh(goal, width)
+  dx = abs(start_x - goal_x)
+  dy = abs(start_y - goal_y)
+  return (dx + dy) - 0.585786* min(dx, dy) 
+  # (D2 - 2 * D) * min(dx, dy) - There are min(dx, dy) diagonal steps, and each one costs D2 but saves you 2x D non-diagonal steps.
+
+def eucl_dist(start, goal, width):
+  return np.linalg.norm(np.array(vid2wh(start, width)) - np.array(vid2wh(goal, width)))
+
+def vid2wh(v, width):
+  w = (v % width)
+  h = int(floor(v/width))
+  return w,h
+
+def wh2vid(w, h, width):
+    vid = h * width + w
+    return int(vid)
+
 def setsub(l1, l2):
   # a function for subtracting lists like sets
   return list(set(l1) - set(l2))
+
 
 def bellfo(g, start, end):
   vn = g.vcount()
@@ -72,11 +152,50 @@ def dijkstra(g, start, end):
         dist[v] = alt
         previus[v] = u
 
+  return reconstruct_path(start, end, previus)
+
+
+def reconstruct_path(start, end, previus):
   path = [end]
   while path[-1] != start:
     path.append(previus[path[-1]])
   path.reverse()
-  return [path]
+  return path
+
+def Astar(g, start, end):
+  vn = g.vcount()
+  dist = [float("inf")] * vn
+  previus = [[]] * vn
+  fscore = [float("inf")] * vn
+
+  Q = list(range(vn))
+  
+  dist[start] = 0
+
+  p = 2/vn
+  fscore[start] = diag_dist(start, end, g["width"]) * (1+p)
+
+  while len(Q) > 0:
+    tmp_dist = []
+    for q in range(vn):
+      if q in Q:
+        tmp_dist.append(fscore[q])
+      else:
+        tmp_dist.append(float('inf'))
+
+    u = tmp_dist.index(min(tmp_dist))
+    if u == end:
+      return reconstruct_path(start, u, previus)
+
+    Q.remove(u)
+    for v in g.neighbors(u):
+      eid = g.get_eid(u, v)
+      alt = dist[u] + g.es(eid)["weight"][0]
+      if alt < dist[v]:
+        dist[v] = alt
+        fscore[v] = alt + diag_dist(v, end, g["width"]) * (1+p)
+        previus[v] = u
+
 
 class Ant:
   def __init__(self, _id, start):
@@ -84,7 +203,6 @@ class Ant:
     self.visited = [start]
     self.position = start
     self.weight_sum = 0
-
 
 def antss(g: ig.Graph, start: int, end: int, 
           number_of_generations=20, number_of_ants=50,
@@ -111,7 +229,7 @@ def antss(g: ig.Graph, start: int, end: int,
     e["pheromone"] = 1
 
   for generation in range(number_of_generations):
-    all_paths, all_paths_weight = ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influence, generation)
+    all_paths, all_paths_weight = ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influence)
       
     ## Pheromone update after each generation
     g = pheromone_update(g, ph_evap_coef, ph_deposition, all_paths, all_paths_weight)
