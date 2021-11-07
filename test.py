@@ -43,11 +43,11 @@ if False:
   except :
     log.exception("Could not load graph from file")
 else: 
-  width = 20
-  height = 20
+  width = 40
+  height = 40
 
   start = wh2vid(1,1, width)
-  end =  wh2vid(18,19, width)
+  end =  wh2vid(38,39, width)
 
   graph = generate_graph(width, height)
 

@@ -22,15 +22,15 @@ frame_height = height * step
 graph = generate_graph(width, height)
 
 # %%
-img = np.zeros((frame_height,frame_width,1), np.uint32)
+img = np.zeros((frame_height,frame_width,3), np.uint32)
 
 for w,h in draw_line(10,2,30,33):
   graph.delete_edges(graph.incident(wh2vid(w,h,width)))
-  img[h*step:h*step+step,w*step:w*step+step] = 255
+  img[h*step:h*step+step,w*step:w*step+step,2] = 255
 
 for w,h in draw_line(40,39, 50, 30):
   graph.delete_edges(graph.incident(wh2vid(w,h,width)))
-  img[h*step:h*step+step,w*step:w*step+step] = 255
+  img[h*step:h*step+step,w*step:w*step+step,2] = 255
 
 
 path = graph.get_shortest_paths(1,100)
@@ -64,7 +64,7 @@ if True:
 
 def update_frame(width, step, v, frame, value):
   w, h = [x * step for x in vid2wh(v, width)]
-  frame[h:h+step,w:w+step] += value
+  frame[h:h+step,w:w+step,1] += value
 
 while True:
   # for h in range(0, height, step):
@@ -87,9 +87,9 @@ while True:
     update_frame(width, step, s, frame, np.uint8(e["pheromone"]))
     update_frame(width, step, t, frame, np.uint8(e["pheromone"]))
 
-  print(frame.max())
-  frame =  np.uint8((frame/frame.max()) * 254)
-
+  print(frame[:,:,1].max())
+  frame[:,:,1] =  (frame[:,:,1]/frame[:,:,1].max()) * 254
+  
     # w, h = [x * step for x in vid2wh(s, width)]
     # tmp_frame[h:h+step,w:w+step] += e["pheromone"]
     # w, h = [x * step for x in vid2wh(t, width)]
@@ -99,7 +99,7 @@ while True:
   # print(all_paths)
 
   # Display the resulting frame
-  cv2.imshow('frame', frame)
+  cv2.imshow('frame', np.uint8(frame))
   if cv2.waitKey(1) == ord('q'):
     break
 
