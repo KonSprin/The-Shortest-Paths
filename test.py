@@ -2,8 +2,7 @@
 import igraph as ig 
 import logging as log
 from splib import *
-from time import time
-from random import randint
+from json import dumps as jdump
 
 # remember to set level to WARNING before actual tests!
 log.basicConfig(level=log.DEBUG,
@@ -43,14 +42,21 @@ if False:
   except :
     log.exception("Could not load graph from file")
 else: 
-  width = 40
-  height = 40
+  width = 100
+  height = 100
 
-  start = wh2vid(1,1, width)
-  end =  wh2vid(38,39, width)
+  start = wh2vid(1,50, width)
+  end =  wh2vid(99,40, width)
 
   graph = generate_graph(width, height)
 
+  deleted_vs = []
+  for w,h in draw_line(50,4,50,85):
+    v = wh2vid(w,h,width)
+    graph.delete_edges(graph.incident(v))
+    deleted_vs.append(v)
+  graph["deleted_vs"] = jdump(deleted_vs)
+    
   for v in graph.vs():
     v["distance"] = np.linalg.norm(np.array(vid2wh(v.index, width)) - np.array(vid2wh(end, width)))
   graph.vs[end]["distance"] = 0.1
@@ -63,19 +69,22 @@ if True:
   target = end
   
   timer = Timer()
-  print(graph.get_shortest_paths(0,target))
+  print(graph.get_shortest_paths(start,target))
   print("Igraph default: " + str(timer.time()))
 
-  print (bellfo(graph,0,target))
+  print(bestfirst(graph,start,target))
+  print("Best first greedy algorithm: " + str(timer.time()))
+  
+  print (bellfo(graph,start,target))
   print("Bellman-Ford: " + str(timer.time()))
 
-  print (dijkstra(graph,0,target))
+  print (dijkstra(graph,start,target))
   print("Dijkstra: " + str(timer.time()))
 
-  print (Astar(graph,0,target))
+  print (Astar(graph,start,target))
   print("A*: " + str(timer.time()))
 
-  print (antss(graph,0,target,30))
+  print (antss(graph,start,target,30))
   print("Ants: " + str(timer.time()))
 
   # LOG.setLevel(log.ERROR)

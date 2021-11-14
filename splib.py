@@ -4,7 +4,7 @@ import igraph as ig
 from time import perf_counter as time
 import numpy as np
 from math import floor 
-
+from json import loads as jload
 ## Graph Functions ##
 
 def generate_edge_list(width, height):
@@ -136,6 +136,8 @@ def dijkstra(g, start, end):
   #   previus.append([])
 
   Q = list(range(vn))
+  for v in jload(g["deleted_vs"]):
+    Q.remove(v)
   
   dist[start] = 0
 
@@ -212,6 +214,37 @@ def Astar(g, start, end):
         previus[v] = u
         if v not in Q:
           Q.append(v)
+
+
+def bestfirst(g, start, end):
+  vn = g.vcount()
+  previus = [[]] * vn
+
+  opened_list = [start]
+  
+  dist = [float("inf")] * vn
+  dist[start] = 0
+  
+  while len(opened_list) > 0:
+    tmp_dist = []
+    for q in range(vn):
+      if q in opened_list:
+        tmp_dist.append(dist[q])
+      else:
+        tmp_dist.append(float('inf'))
+    u = tmp_dist.index(min(tmp_dist))
+    
+    if u == end:
+      return reconstruct_path(start, u, previus)
+
+    opened_list.remove(u)
+    for v in g.neighbors(u):
+      alt = dist[u] + diag_dist(v, end, g["width"])
+      if alt < dist[v]:
+        dist[v] = alt
+        previus[v] = u
+        if v not in opened_list:
+          opened_list.append(v)
 
 
 class Ant:

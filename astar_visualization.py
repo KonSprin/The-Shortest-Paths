@@ -59,8 +59,11 @@ update_frame(width, step, end, img, 'r')
 #   v["distance"] = diag_dist(v.index,end,width)
 # graph.vs[end]["distance"] = 0.000001
 
+# for e in graph.es():
+#   e["weight"] = diag_dist(graph.vs[e.target].index,end,width)
+
 for e in graph.es():
-  e["weight"] = diag_dist(graph.vs[e.target].index,end,width)
+  e["weight"] = 1
 
 # if True:
 #   ig.save(graph, "graphs/basic.graphml")
