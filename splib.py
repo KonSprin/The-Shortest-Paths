@@ -5,15 +5,7 @@ from time import perf_counter as time
 import numpy as np
 from math import floor 
 
-class Timer:
-    def __init__(self):
-        self.start = time()
-
-    def time(self):
-      elapsed = time() - self.start
-      log.debug( f"Elapsed time: {elapsed:0.4f} seconds" )
-      self.start = time()
-      return elapsed
+## Graph Functions ##
 
 def generate_edge_list(width, height):
   edges = []
@@ -67,6 +59,7 @@ def draw_line(x0, y0, x1, y1):
     # print (x0,y0)
   return line
 
+## Helper functions ##
 
 def man_dist(start, goal, width):
   start_x, start_y = vid2wh(start, width)
@@ -97,6 +90,17 @@ def setsub(l1, l2):
   # a function for subtracting lists like sets
   return list(set(l1) - set(l2))
 
+class Timer:
+    def __init__(self):
+        self.start = time()
+
+    def time(self):
+      elapsed = time() - self.start
+      log.debug( f"Elapsed time: {elapsed:0.4f} seconds" )
+      self.start = time()
+      return elapsed
+
+## Pathfinding functions ##
 
 def bellfo(g, start, end):
   vn = g.vcount()
@@ -163,16 +167,27 @@ def reconstruct_path(start, end, previus):
   return path
 
 def Astar(g, start, end):
-  vn = g.vcount()
-  dist = [float("inf")] * vn
-  previus = [[]] * vn
-  fscore = [float("inf")] * vn
+  """[summary]
 
-  Q = list(range(vn))
+  Args:
+      g ([type]): [description]
+      start ([type]): [description]
+      end ([type]): [description]
+
+  Returns:
+      [type]: [description]
+  """
+  vn = g.vcount()
+  p = 2/vn
   
+  previus = [[]] * vn
+
+  Q = [start]
+  
+  dist = [float("inf")] * vn
   dist[start] = 0
 
-  p = 2/vn
+  fscore = [float("inf")] * vn
   fscore[start] = diag_dist(start, end, g["width"]) * (1+p)
 
   while len(Q) > 0:
@@ -182,8 +197,8 @@ def Astar(g, start, end):
         tmp_dist.append(fscore[q])
       else:
         tmp_dist.append(float('inf'))
-
     u = tmp_dist.index(min(tmp_dist))
+    
     if u == end:
       return reconstruct_path(start, u, previus)
 
@@ -195,6 +210,8 @@ def Astar(g, start, end):
         dist[v] = alt
         fscore[v] = alt + diag_dist(v, end, g["width"]) * (1+p)
         previus[v] = u
+        if v not in Q:
+          Q.append(v)
 
 
 class Ant:
