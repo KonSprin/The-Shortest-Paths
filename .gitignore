@@ -5,9 +5,11 @@ AS internet structure/
 # Environments
 venv/
 
-generated.graphml
-
 # Extensions
 *.png
 *.txt
 *.log
+*.graphml
+
+# Exceptions
+!basic.graphml
