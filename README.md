@@ -23,6 +23,8 @@ This is source code for my engineer degree diploma.
     - [Genetic Algorithm](http://datajobstest.com/data-science-repo/Genetic-Algorithm-Guide-[Tom-Mathew].pdf)
     - [Search-Based Optimal Solvers for the MAPP](https://www.aaai.org/ocs/index.php/SOCS/SOCS17/paper/viewFile/15781/15053)
     - [A*-based Pathfinding in Modern Computer Games](https://www.researchgate.net/profile/Xiao-Cui-12/publication/267809499_A-based_Pathfinding_in_Modern_Computer_Games/links/54fd73740cf270426d125adc/A-based-Pathfinding-in-Modern-Computer-Games.pdf)
+    - [A* Heuristicsc](http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html)
+    - [Genetic algorithms](https://towardsdatascience.com/introduction-to-genetic-algorithms-including-example-code-e396e98d8bf3)
 2. Code
     - [Visualising Graph Data with Python-igraph](https://towardsdatascience.com/visualising-graph-data-with-python-igraph-b3cc81a495cf)
     - [igraph API ](https://igraph.org/python/doc/api/)
@@ -33,3 +35,7 @@ This is source code for my engineer degree diploma.
 4. Wikipedia
     - [A* search algorithm](https://en.wikipedia.org/wiki/A*_search_algorithm)
     - [Ant colony algorithm](https://en.wikipedia.org/wiki/Ant_colony_optimization_algorithms)
+    - [Dijkstra](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
+    - [Shortest Path Problem](https://en.wikipedia.org/wiki/Shortest_path_problem)
+5. Other
+    - [Ant and Slime simulations](https://www.youtube.com/watch?v=X-iSQQgOd1A)

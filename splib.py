@@ -90,6 +90,19 @@ def setsub(l1, l2):
   # a function for subtracting lists like sets
   return list(set(l1) - set(l2))
 
+def update_frame(width, step, v, frame, colour):
+  w, h = [x * step for x in vid2wh(v, width)]
+  if colour == 'r': 
+    frame[h:h+step,w:w+step,2] = 255
+  elif colour == 'g':
+    frame[h:h+step,w:w+step,1] = 255
+  elif colour == 'b':
+    frame[h:h+step,w:w+step,0] = 255
+  elif colour == 'w':
+    frame[h:h+step,w:w+step] = 255
+  elif colour == 'k':
+    frame[h:h+step,w:w+step] = 0
+
 class Timer:
     def __init__(self):
         self.start = time()
@@ -99,6 +112,10 @@ class Timer:
       log.debug( f"Elapsed time: {elapsed:0.4f} seconds" )
       self.start = time()
       return elapsed
+
+def lprint(message: str):
+  print(message)
+  log.info(message)
 
 ## Pathfinding functions ##
 
@@ -124,7 +141,7 @@ def bellfo(g, start, end):
   while path[-1] != start:
     path.append(predecessor[path[-1]])
   path.reverse()
-  return [path]
+  return path
 
 
 def dijkstra(g, start, end):

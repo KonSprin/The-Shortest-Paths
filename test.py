@@ -3,11 +3,24 @@ import igraph as ig
 import logging as log
 from splib import *
 from json import dumps as jdump
+from sys import stdout
 
 # remember to set level to WARNING before actual tests!
-log.basicConfig(level=log.DEBUG,
-                filename='sp.log', filemode='w', 
-                format='%(levelname)s: %(module)s %(asctime)s %(message)s')
+logging_type = "file_only"
+
+if logging_type == "file_only":
+  log.basicConfig(level=log.DEBUG,
+                  format='%(levelname)s: %(module)s %(asctime)s %(message)s',
+                  filename='sp.log', filemode='w')
+elif logging_type == "stdout+logging":
+  file_handler = log.FileHandler(filename='sp.log')
+  stdout_handler = log.StreamHandler(stdout)
+  handlers = [file_handler, stdout_handler]
+
+  log.basicConfig(level=log.DEBUG,
+                  format='%(levelname)s: %(module)s %(asctime)s %(message)s',
+                  handlers=handlers)
+
 LOG = log.getLogger()
 
 if False:
@@ -46,7 +59,7 @@ else:
   height = 100
 
   start = wh2vid(1,50, width)
-  end =  wh2vid(99,40, width)
+  end =  wh2vid(999,40, width)
 
   graph = generate_graph(width, height)
 
@@ -62,30 +75,34 @@ else:
   graph.vs[end]["distance"] = 0.1
 
   for e in graph.es():
-      e["weight"] = graph.vs[e.target]["distance"]
+      # e["weight"] = graph.vs[e.target]["distance"]
+      e["weight"] = 1
   ig.save(graph, "graphs/basic.graphml")
 
 if True:
   target = end
   
-  timer = Timer()
-  print(graph.get_shortest_paths(start,target))
-  print("Igraph default: " + str(timer.time()))
-
-  print(bestfirst(graph,start,target))
-  print("Best first greedy algorithm: " + str(timer.time()))
+  nnodes = width*height
+  lprint("Test for " + str(nnodes) + " nodes")
   
-  print (bellfo(graph,start,target))
-  print("Bellman-Ford: " + str(timer.time()))
+  timer = Timer()
+  path_length = str(len(graph.get_shortest_paths(start,target)[0]))
+  lprint("Igraph default: " + str(timer.time()) + "s, path length: " + path_length)
 
-  print (dijkstra(graph,start,target))
-  print("Dijkstra: " + str(timer.time()))
+  path_length = str(len(bestfirst(graph,start,target)))
+  lprint("Best first greedy algorithm: " + str(timer.time()) + "s, path length: " + path_length)
+  
+  path_length = str(len(bellfo(graph,start,target)))
+  lprint("Bellman-Ford: " + str(timer.time()) + "s, path length: " + path_length)
 
-  print (Astar(graph,start,target))
-  print("A*: " + str(timer.time()))
+  # path_length = str(len(dijkstra(graph,start,target)))
+  # print("Dijkstra: " + str(timer.time()) + "s, path length: " + path_length)
 
-  print (antss(graph,start,target,30))
-  print("Ants: " + str(timer.time()))
+  path_length = str(len(Astar(graph,start,target)))
+  lprint("A*: " + str(timer.time()) + "s, path length: " + path_length)
+
+  path_length = str(len(antss(graph,start,target,30)))
+  lprint("Ants: " + str(timer.time()) + "s, path length: " + path_length)
 
   # LOG.setLevel(log.ERROR)
   # print (antss(graph,0,108,30))

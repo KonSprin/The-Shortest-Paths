@@ -11,19 +11,6 @@ log.basicConfig(level=log.DEBUG,
                 filename='sp.log', filemode='w', 
                 format='%(levelname)s: %(module)s %(asctime)s %(message)s')
 
-def update_frame(width, step, v, frame, colour):
-  w, h = [x * step for x in vid2wh(v, width)]
-  if colour == 'r': 
-    frame[h:h+step,w:w+step,2] = 255
-  elif colour == 'g':
-    frame[h:h+step,w:w+step,1] = 255
-  elif colour == 'b':
-    frame[h:h+step,w:w+step,0] = 255
-  elif colour == 'w':
-    frame[h:h+step,w:w+step] = 255
-  elif colour == 'k':
-    frame[h:h+step,w:w+step] = 0
-
 # %%
 
 width = 60
@@ -68,63 +55,66 @@ for e in graph.es():
 # if True:
 #   ig.save(graph, "graphs/basic.graphml")
 
-vn = graph.vcount()
-p = 2/vn
+def astar_visualization(width, step, graph, img, start, end):
+  vn = graph.vcount()
+  p = 2/vn
 
-previus = [[]] * vn
+  previus = [[]] * vn
 
-Q = [start]
-closed = []
+  Q = [start]
+  closed = []
 
-dist = [float("inf")] * vn
-dist[start] = 0
+  dist = [float("inf")] * vn
+  dist[start] = 0
 
-fscore = [float("inf")] * vn
-# fscore[start] = 0
-fscore[start] = diag_dist(start, end, graph["width"]) * (1+p)
+  fscore = [float("inf")] * vn
+  # fscore[start] = 0
+  fscore[start] = diag_dist(start, end, graph["width"]) * (1+p)
 
-while len(Q) > 0:
-  tmp_dist = []
-  for q in range(vn):
-    if q in Q:
-      tmp_dist.append(fscore[q])
-    else:
-      tmp_dist.append(float('inf'))
-  u = tmp_dist.index(min(tmp_dist))
-  
-  if u == end:
-    path = reconstruct_path(start, u, previus)
-    for v in path:
-      update_frame(width, step, v, frame, 'w')
-    if cv2.waitKey(0) == ord('q'):
-      break
+  while len(Q) > 0:
+    tmp_dist = []
+    for q in range(vn):
+      if q in Q:
+        tmp_dist.append(fscore[q])
+      else:
+        tmp_dist.append(float('inf'))
+    u = tmp_dist.index(min(tmp_dist))
 
-  Q.remove(u)
-  closed.append(u)
-  for v in graph.neighbors(u):
-    eid = graph.get_eid(u, v)
-    alt = dist[u] + graph.es(eid)["weight"][0]
-    if alt < dist[v]:
-      dist[v] = alt
-      fscore[v] = alt + diag_dist(v, end, graph["width"]) * (1+p)
-      # fscore[v] = alt
-      previus[v] = u
-      if v not in Q:
-          Q.append(v)
-      
-  frame = img
+    if u == end:
+      path = reconstruct_path(start, u, previus)
+      for v in path:
+        update_frame(width, step, v, frame, 'w')
+      if cv2.waitKey(0) == ord('q'):
+        break
 
-  for v in Q:
-    update_frame(width, step, v, frame, 'g')
+    Q.remove(u)
+    closed.append(u)
+    for v in graph.neighbors(u):
+      eid = graph.get_eid(u, v)
+      alt = dist[u] + graph.es(eid)["weight"][0]
+      if alt < dist[v]:
+        dist[v] = alt
+        fscore[v] = alt + diag_dist(v, end, graph["width"]) * (1+p)
+    # fscore[v] = alt
+        previus[v] = u
+        if v not in Q:
+            Q.append(v)
     
-  for v in closed:
-    update_frame(width, step, v, frame, 'b')
-  
+    frame = img
+
+    for v in Q:
+      update_frame(width, step, v, frame, 'g')
+
+    for v in closed:
+      update_frame(width, step, v, frame, 'b')
+
 
   # Display the resulting frame
-  cv2.imshow('frame', np.uint8(frame))
-  if cv2.waitKey(1) == ord('q'):
-    break
+    cv2.imshow('frame', np.uint8(frame))
+    if cv2.waitKey(1) == ord('q'):
+      break
 
-# When everything done, release the capture
-cv2.destroyAllWindows()
+  # When everything done, release the capture
+  cv2.destroyAllWindows()
+
+astar_visualization(width, step, graph, img, start, end)
