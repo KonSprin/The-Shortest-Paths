@@ -1,5 +1,5 @@
 import cv2
-from splib import *
+from spmodule.splib import *
 import numpy as np
 
 def astar_visualization(width, step, graph, img, start, end):
@@ -95,11 +95,11 @@ def greedy_visualization(width, step, graph, img, start, end):
     opened_list.remove(u)
     closed.append(u)
     for v in graph.neighbors(u):
-      alt = dist[u] + diag_dist(v, end, width)
+      alt = diag_dist(v, end, width)
       if alt < dist[v]:
         dist[v] = alt
         previus[v] = u
-        if v not in opened_list:
+        if (v not in opened_list) and (v not in closed):
             opened_list.append(v)
     
     frame = img

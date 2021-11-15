@@ -28,7 +28,10 @@ for w,h in draw_line(10,2,30,33):
 for w,h in draw_line(40,39, 50, 30):
   graph.delete_edges(graph.incident(wh2vid(w,h,width)))
   img[h*step:h*step+step,w*step:w*step+step,2] = 255
-
+  
+for w,h in draw_line(25,20, 10, 35):
+  graph.delete_edges(graph.incident(wh2vid(w,h,width)))
+  img[h*step:h*step+step,w*step:w*step+step,2] = 255
 
 path = graph.get_shortest_paths(1,100)
 print(path)
@@ -52,9 +55,9 @@ for e in graph.es():
 # if True:
 #   ig.save(graph, "graphs/basic.graphml")
 
-astar_visualization(width, step, graph, img, start, end)
+# astar_visualization(width, step, graph, img, start, end)
 
-greedy_visualization(width, step, graph, img, start, end)
+# greedy_visualization(width, step, graph, img, start, end)
 
 number_of_ants = 100
 ph_influence = 1

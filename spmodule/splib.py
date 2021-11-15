@@ -256,7 +256,7 @@ def bestfirst(g, start, end):
 
     opened_list.remove(u)
     for v in g.neighbors(u):
-      alt = dist[u] + diag_dist(v, end, g["width"])
+      alt = diag_dist(v, end, g["width"])
       if alt < dist[v]:
         dist[v] = alt
         previus[v] = u
