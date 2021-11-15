@@ -1,7 +1,7 @@
 # %%
 import igraph as ig 
 import logging as log
-from splib import *
+from spmodule.splib import *
 from json import dumps as jdump
 from sys import stdout
 
