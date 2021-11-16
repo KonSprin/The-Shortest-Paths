@@ -34,10 +34,7 @@ def astar_visualization(width, step, graph, img, start, end):
 
     if u == end:
       path = reconstruct_path(start, u, previus)
-      for v in path:
-        update_frame(width, step, v, frame, 'w')
-      if cv2.waitKey(0) == ord('q'):
-        break
+      return path
 
     Q.remove(u)
     closed.append(u)
@@ -96,10 +93,7 @@ def greedy_visualization(width, step, graph, img, start, end):
 
     if u == end:
       path = reconstruct_path(start, u, previus)
-      for v in path:
-        update_frame(width, step, v, frame, 'w')
-      if cv2.waitKey(0) == ord('q'):
-        break
+      return path
 
     opened_list.remove(u)
     closed.append(u)
@@ -174,4 +168,3 @@ def ant_visualization(width, step, graph, img, start, end, number_of_ants, ph_in
       break
 
   # When everything done, release the capture
-  cv2.destroyAllWindows()

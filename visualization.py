@@ -28,8 +28,8 @@ while path == [[]]:
   graph = generate_graph(width, height)
   img = np.zeros((frame_height,frame_width,3), np.uint32)
   
-  add_mountains(graph, img, sample(range(width*height), 3), 10, step)
-  random_points(graph, img, step, 0, start, end)
+  add_mountains(graph, img, sample(range(width*height), 6), 10, step)
+  random_points(graph, img, step, 20, start, end)
   try: 
     path = graph.get_shortest_paths(start, end)
   except RuntimeWarning: 
@@ -65,9 +65,9 @@ for e in graph.es():
 # if True:
 #   ig.save(graph, "graphs/basic.graphml")
 
-astar_visualization(width, step, graph, img, start, end)
+path = astar_visualization(width, step, graph, img, start, end)
 
-# greedy_visualization(width, step, graph, img, start, end)
+# path = greedy_visualization(width, step, graph, img, start, end)
 
 # number_of_ants = 100
 # ph_influence = 1
@@ -76,3 +76,10 @@ astar_visualization(width, step, graph, img, start, end)
 # ph_deposition=8000
 
 # ant_visualization(width, step, graph, img, start, end, number_of_ants, ph_influence, weight_influence, ph_evap_coef, ph_deposition)
+
+for v in path:
+  update_frame(width, step, v ,img, 'w')
+  
+cv2.imshow('frame', np.uint8(img))
+if cv2.waitKey(0) == ord('q'):
+  cv2.destroyAllWindows()
