@@ -155,18 +155,35 @@ def smoothen_terrain(graph):
   smothened = []
 
   while len(smothened) < graph.vcount():
+    
     tmp_height = height
     for u in smothened:
       tmp_height[u] = 0
     v = tmp_height.index(max(tmp_height))
+    
+    smothened.append(v)
+    v_height = graph.vs(v)["height"][0] * 0.9
+    for nei in graph.neighbors(v):
+      vnei = graph.vs(nei)
+      if vnei["height"][0] < v_height:
+        height[nei] = v_height
+        vnei["height"] = v_height
+ 
+def add_mountains(graph, img, mountain_list, height, step):  
+  for mountain in mountain_list:
+    graph.vs(mountain)["height"] = height
+    
+  smoothen_terrain(graph)
   
+  for e in graph.es():
+    e["weight"] = (graph.vs(e.target)["height"][0] + graph.vs(e.source)["height"][0]) / 2
   
-  # for u in range(graph.vcount()):
-  #   if u in smothened:
-  #     tmp_smoth.append(0)
-  #   else:
-  #     tmp_smoth.append()
-  
+  scalar = 100/height
+  for v in graph.vs():
+    w, h = vid2wh(v.index, graph["width"])
+    img[h*step:h*step+step,w*step:w*step+step,2] = v["height"] * scalar
+
+   
 class Timer:
     def __init__(self):
         self.start = time()

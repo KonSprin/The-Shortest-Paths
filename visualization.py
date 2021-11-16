@@ -3,6 +3,7 @@ import numpy as np
 import logging as log
 from spmodule.graphVis import *
 from spmodule.splib import *
+from random import sample
 
 log.basicConfig(level=log.DEBUG,
                 filename='sp.log', filemode='w', 
@@ -26,7 +27,8 @@ path = [[]]
 while path == [[]]:
   graph = generate_graph(width, height)
   img = np.zeros((frame_height,frame_width,3), np.uint32)
-
+  
+  add_mountains(graph, img, sample(range(width*height), 3), 10, step)
   random_points(graph, img, step, 0, start, end)
   try: 
     path = graph.get_shortest_paths(start, end)
