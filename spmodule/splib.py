@@ -16,6 +16,8 @@ def generate_edge_list(width, height):
       vid = wh2vid(w, h, width)
       edges.append((vid,vid + 1))
       edges.append((vid,vid + width))
+      edges.append((vid,vid + width + 1))
+      edges.append((vid + 1,vid + width))
     vid += 1
     edges.append((vid, vid + width))
   for w in range(width-1):

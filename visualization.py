@@ -20,8 +20,8 @@ step = 16
 frame_width = width * step
 frame_height = height * step
 
-start = wh2vid(3,20, width)
-end =  wh2vid(45,30, width)
+start = wh2vid(0,39, width)
+end =  wh2vid(59,0, width)
 
 path = [[]]
 while path == [[]]:
