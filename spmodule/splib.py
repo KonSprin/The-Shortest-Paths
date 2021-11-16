@@ -5,6 +5,8 @@ from time import perf_counter as time
 import numpy as np
 from math import floor 
 from json import loads as jload
+from random import sample
+
 ## Graph Functions ##
 
 def generate_edge_list(width, height):
@@ -102,6 +104,26 @@ def update_frame(width, step, v, frame, colour):
     frame[h:h+step,w:w+step] = 255
   elif colour == 'k':
     frame[h:h+step,w:w+step] = 0
+
+def random_walls(graph, img, step, percentage, start, target):
+  vount = graph.vcount()
+  nwalls = int(vount * percentage / 100)
+  ommited = 0
+  to_deploy = nwalls
+  while to_deploy > 0:
+    print((to_deploy,ommited))
+    # print(to_deploy, ommited)
+    walls = sample(range(vount), to_deploy - ommited)
+    ommited = 0
+    for wall in walls:
+      if graph.is_separator(wall):
+        ommited += 1
+        continue
+      graph.delete_edges(graph.incident(wall))
+      w,h = vid2wh(wall, graph["width"])
+      img[h*step:h*step+step,w*step:w*step+step,2] = 255
+      to_deploy -= 1
+
 
 class Timer:
     def __init__(self):

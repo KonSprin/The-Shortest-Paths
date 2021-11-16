@@ -1,3 +1,4 @@
+from os import close
 import cv2
 from spmodule.splib import *
 import numpy as np
@@ -5,7 +6,7 @@ import numpy as np
 def astar_visualization(width, step, graph, img, start, end):
   vn = graph.vcount()
   p = 2/vn
-
+  
   previus = [[]] * vn
 
   Q = [start]
@@ -16,7 +17,7 @@ def astar_visualization(width, step, graph, img, start, end):
 
   fscore = [float("inf")] * vn
   # fscore[start] = 0
-  fscore[start] = diag_dist(start, end, graph["width"]) * (1+p)
+  fscore[start] = diag_dist(start, end, width) * (1+p)
 
   while len(Q) > 0:
     tmp_dist = []
@@ -37,11 +38,14 @@ def astar_visualization(width, step, graph, img, start, end):
     Q.remove(u)
     closed.append(u)
     for v in graph.neighbors(u):
+      if v in closed:
+        continue
+      
       eid = graph.get_eid(u, v)
       alt = dist[u] + graph.es(eid)["weight"][0]
       if alt < dist[v]:
         dist[v] = alt
-        fscore[v] = alt + diag_dist(v, end, graph["width"]) * (1+p)
+        fscore[v] = alt + diag_dist(v, end, width) * (1+p)
     # fscore[v] = alt
         previus[v] = u
         if v not in Q:
