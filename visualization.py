@@ -3,7 +3,7 @@ import numpy as np
 import logging as log
 from spmodule.graphVis import *
 from spmodule.splib import *
-from random import sample
+from json import dumps as jdump
 
 log.basicConfig(level=log.DEBUG,
                 filename='sp.log', filemode='w', 
@@ -17,28 +17,16 @@ log.captureWarnings(True)
 width = 60
 height = 40
 step = 16
-frame_width = width * step
-frame_height = height * step
 
 start = wh2vid(0,39, width)
 end =  wh2vid(59,0, width)
 
-path = [[]]
-while path == [[]]:
-  graph = generate_graph(width, height)
-  img = np.zeros((frame_height,frame_width,3), np.uint32)
-  
-  add_mountains(graph, img, sample(range(width*height), 6), 10, step)
-  random_points(graph, img, step, 20, start, end)
-  try: 
-    path = graph.get_shortest_paths(start, end)
-  except RuntimeWarning: 
-    log.warning("lmao")
-    pass
-print(path)
+no_mountains = 6
+mountain_height = 5
+wall_percent = 30
+graph, img = generate_weighted_graph(width, height, step, start, end, no_mountains, mountain_height, wall_percent)
 
-update_frame(width, step, end, img, 'b')
-update_frame(width, step, start, img, 'b')
+ig.save(graph, "graphs/basic.graphml")
 
 # for w,h in draw_line(10,2,30,33):
 #   graph.delete_edges(graph.incident(wh2vid(w,h,width)))
@@ -59,16 +47,24 @@ update_frame(width, step, start, img, 'b')
 # for e in graph.es():
 #   e["weight"] = diag_dist(graph.vs[e.target].index,end,width)
 
-for e in graph.es():
-  e["weight"] = 1
 
 # if True:
 #   ig.save(graph, "graphs/basic.graphml")
 
+print(sum([graph.vs(v)["height"][0] for v in dijkstra(graph, start, end)]))
+
 path = astar_visualization(width, step, graph, img, start, end)
-
-# path = greedy_visualization(width, step, graph, img, start, end)
-
+astart_cost = sum([graph.vs(v)["height"][0] for v in path])
+print(astart_cost)
+for v in path:
+  update_frame(width, step, v ,img, 'w')
+  
+path = greedy_visualization(width, step, graph, img, start, end)
+greedy_cost = sum([graph.vs(v)["height"][0] for v in path])
+print(greedy_cost)
+for v in path:
+  update_frame(width, step, v ,img, 'w')
+  
 # number_of_ants = 100
 # ph_influence = 1
 # weight_influence = 3
@@ -77,9 +73,8 @@ path = astar_visualization(width, step, graph, img, start, end)
 
 # ant_visualization(width, step, graph, img, start, end, number_of_ants, ph_influence, weight_influence, ph_evap_coef, ph_deposition)
 
-for v in path:
-  update_frame(width, step, v ,img, 'w')
   
 cv2.imshow('frame', np.uint8(img))
+
 if cv2.waitKey(0) == ord('q'):
   cv2.destroyAllWindows()

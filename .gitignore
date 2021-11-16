@@ -12,4 +12,4 @@ venv/
 *.graphml
 
 # Exceptions
-!basic.graphml
+# !basic.graphml

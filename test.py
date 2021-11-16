@@ -63,12 +63,12 @@ else:
 
   graph = generate_graph(width, height)
 
-  deleted_vs = []
+  # deleted_vs = []
   for w,h in draw_line(50,4,50,85):
     v = wh2vid(w,h,width)
     graph.delete_edges(graph.incident(v))
-    deleted_vs.append(v)
-  graph["deleted_vs"] = jdump(deleted_vs)
+    # deleted_vs.append(v)
+  # graph["deleted_vs"] = jdump(deleted_vs)
     
   for v in graph.vs():
     v["distance"] = np.linalg.norm(np.array(vid2wh(v.index, width)) - np.array(vid2wh(end, width)))

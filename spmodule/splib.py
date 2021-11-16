@@ -5,7 +5,7 @@ from time import perf_counter as time
 import numpy as np
 from math import floor 
 from json import loads as jload
-from random import random, randint
+from random import random, randint, sample
 
 ## Graph Functions ##
 
@@ -43,6 +43,25 @@ def generate_graph(width, height):
     v["height"] = 1
 
   return graph
+
+def generate_weighted_graph(width, height, step, start, end, no_mountains, mountain_height, wall_percent):
+  frame_width = width * step
+  frame_height = height * step
+  path = [[]]
+  while path == [[]]:
+    graph = generate_graph(width, height)
+    img = np.zeros((frame_height,frame_width,3), np.uint32)
+    add_mountains(graph, img, sample(range(width*height), no_mountains), mountain_height, step)
+
+    random_points(graph, img, step, wall_percent, start, end)
+    try: 
+      path = graph.get_shortest_paths(start, end)
+    except RuntimeWarning: 
+      log.warning("lmao")
+      pass
+  update_frame(width, step, end, img, 'b')
+  update_frame(width, step, start, img, 'b')
+  return graph,img
 
 def draw_line(x0, y0, x1, y1):
   line=[(x0, y0)]
@@ -231,26 +250,23 @@ def dijkstra(g, start, end):
   vn = g.vcount()
   dist = [float("inf")] * vn
   previus = [[]] * vn
-  # for v in g.vs():
-  #   dist.append(float('inf'))
-  #   previus.append([])
 
-  Q = list(range(vn))
-  for v in jload(g["deleted_vs"]):
-    Q.remove(v)
+  opened = list(range(vn))
   
   dist[start] = 0
+  closed = []
 
-  while len(Q) > 0:
-    tmp_dist = []
-    for q in range(vn):
-      if q in Q:
-        tmp_dist.append(dist[q])
-      else:
-        tmp_dist.append(float('inf'))
-    
+  while len(opened) > 0:
+    tmp_dist = dist.copy()
+    for q in closed:
+      tmp_dist[q] = float('inf')
+      
     u = tmp_dist.index(min(tmp_dist))
-    Q.remove(u)
+    opened.remove(u)
+    closed.append(u)
+    
+    if u == end: return reconstruct_path(start, end, previus)
+    
     for v in g.neighbors(u):
       eid = g.get_eid(u, v)
       alt = dist[u] + g.es(eid)["weight"][0]
@@ -284,7 +300,8 @@ def Astar(g, start, end):
   
   previus = [[]] * vn
 
-  Q = [start]
+  opened = [start]
+  closed = []
   
   dist = [float("inf")] * vn
   dist[start] = 0
@@ -292,19 +309,18 @@ def Astar(g, start, end):
   fscore = [float("inf")] * vn
   fscore[start] = diag_dist(start, end, g["width"]) * (1+p)
 
-  while len(Q) > 0:
-    tmp_dist = []
-    for q in range(vn):
-      if q in Q:
-        tmp_dist.append(fscore[q])
-      else:
-        tmp_dist.append(float('inf'))
+  while len(opened) > 0:
+    tmp_dist = fscore.copy()
+    for opened in closed:
+      tmp_dist[opened] = float('inf')
+
     u = tmp_dist.index(min(tmp_dist))
     
     if u == end:
       return reconstruct_path(start, u, previus)
 
-    Q.remove(u)
+    closed.append(u)
+    opened.remove(u)
     for v in g.neighbors(u):
       eid = g.get_eid(u, v)
       alt = dist[u] + g.es(eid)["weight"][0]
@@ -312,8 +328,8 @@ def Astar(g, start, end):
         dist[v] = alt
         fscore[v] = alt + diag_dist(v, end, g["width"]) * (1+p)
         previus[v] = u
-        if v not in Q:
-          Q.append(v)
+        if v not in opened:
+          opened.append(v)
 
 
 def bestfirst(g, start, end):
@@ -327,9 +343,9 @@ def bestfirst(g, start, end):
   
   while len(opened_list) > 0:
     tmp_dist = []
-    for q in range(vn):
-      if q in opened_list:
-        tmp_dist.append(dist[q])
+    for opened in range(vn):
+      if opened in opened_list:
+        tmp_dist.append(dist[opened])
       else:
         tmp_dist.append(float('inf'))
     u = tmp_dist.index(min(tmp_dist))

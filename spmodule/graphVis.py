@@ -20,7 +20,7 @@ def astar_visualization(width, step, graph, img, start, end):
   fscore[start] = diag_dist(start, end, width) * (1+p)
 
   while len(Q) > 0:
-    tmp_dist = fscore
+    tmp_dist = fscore.copy()
     for q in closed:
       tmp_dist[q] = float('inf')
     
