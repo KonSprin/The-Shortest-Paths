@@ -5,7 +5,7 @@ from time import perf_counter as time
 import numpy as np
 from math import floor 
 from json import loads as jload
-from random import sample
+from random import random, randint
 
 ## Graph Functions ##
 
@@ -36,6 +36,9 @@ def generate_graph(width, height):
   # Initial value of pheromone on each edge 
   for e in graph.es():
     e["pheromone"] = 1
+  
+  for v in graph.vs():
+    v["height"] = 1
 
   return graph
 
@@ -105,26 +108,65 @@ def update_frame(width, step, v, frame, colour):
   elif colour == 'k':
     frame[h:h+step,w:w+step] = 0
 
-def random_walls(graph, img, step, percentage, start, target):
-  vount = graph.vcount()
-  nwalls = int(vount * percentage / 100)
-  ommited = 0
-  to_deploy = nwalls
-  while to_deploy > 0:
-    print((to_deploy,ommited))
-    # print(to_deploy, ommited)
-    walls = sample(range(vount), to_deploy - ommited)
-    ommited = 0
-    for wall in walls:
-      if graph.is_separator(wall):
-        ommited += 1
-        continue
-      graph.delete_edges(graph.incident(wall))
-      w,h = vid2wh(wall, graph["width"])
-      img[h*step:h*step+step,w*step:w*step+step,2] = 255
-      to_deploy -= 1
+def random_points(graph, img, step, percentage, start, target):
+  vcount = graph.vcount()
+  
+  v = choose_v(vcount, [start, target])
+      
+  deleted = []  
+  while len(deleted) < (vcount * percentage / 100):
+    v_nei = graph.neighbors(v)
+    
+    if decision(0.1) or len(v_nei) == 0:
+      v = choose_v(vcount, [start, target] + deleted)
+      continue
+    
+    graph.delete_edges(graph.incident(v))
+    deleted.append(v)
+    for nei in v_nei:
+      if nei in [start, target]:
+        v_nei.remove(nei)
+    if len(v_nei) == 0:
+      v = choose_v(vcount, [start, target] + deleted)
+      continue
+    v = v_nei[randint(0, len(v_nei)-1)]
 
+  for v in deleted:
+    w, h = vid2wh(v, graph["width"])
+    img[h*step:h*step+step,w*step:w*step+step,2] = 255
+  
+def decision(probability):
+  return random() < probability
+  
+def choose_v(vcount, exclude):
+    v = None
+    while v is None:
+      v = randint(0, vcount-1)
+      if v in exclude:
+        v = None
+    return v
+  
+def smoothen_terrain(graph):
+  height = []
+  
+  for v in graph.vs():
+    height.append(v["height"])
 
+  smothened = []
+
+  while len(smothened) < graph.vcount():
+    tmp_height = height
+    for u in smothened:
+      tmp_height[u] = 0
+    v = tmp_height.index(max(tmp_height))
+  
+  
+  # for u in range(graph.vcount()):
+  #   if u in smothened:
+  #     tmp_smoth.append(0)
+  #   else:
+  #     tmp_smoth.append()
+  
 class Timer:
     def __init__(self):
         self.start = time()

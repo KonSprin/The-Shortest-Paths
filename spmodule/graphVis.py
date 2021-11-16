@@ -20,12 +20,16 @@ def astar_visualization(width, step, graph, img, start, end):
   fscore[start] = diag_dist(start, end, width) * (1+p)
 
   while len(Q) > 0:
-    tmp_dist = []
-    for q in range(vn):
-      if q in Q:
-        tmp_dist.append(fscore[q])
-      else:
-        tmp_dist.append(float('inf'))
+    tmp_dist = fscore
+    for q in closed:
+      tmp_dist[q] = float('inf')
+    
+    # tmp_dist = []
+    # for q in range(vn):
+    #   if q in Q:
+    #     tmp_dist.append(fscore[q])
+    #   else:
+    #     tmp_dist.append(float('inf'))
     u = tmp_dist.index(min(tmp_dist))
 
     if u == end:
@@ -66,7 +70,8 @@ def astar_visualization(width, step, graph, img, start, end):
       break
 
   # When everything done, release the capture
-  cv2.destroyAllWindows()
+  if cv2.waitKey(0) == ord('q'):
+    cv2.destroyAllWindows()
 
 
 def greedy_visualization(width, step, graph, img, start, end):
