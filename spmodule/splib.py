@@ -1,10 +1,10 @@
-from random import choices
 import logging as log
 import igraph as ig
-from time import perf_counter as time
 import numpy as np
+
+from time import perf_counter as time
+from random import choices
 from math import floor 
-from json import loads as jload
 from random import random, randint, sample
 
 ## Graph Functions ##
@@ -116,7 +116,7 @@ def setsub(l1, l2):
   # a function for subtracting lists like sets
   return list(set(l1) - set(l2))
 
-def update_frame(width, step, v, frame, colour):
+def update_frame(width, step, v, frame, colour = 'rand'):
   w, h = [x * step for x in vid2wh(v, width)]
   if colour == 'r': 
     frame[h:h+step,w:w+step,2] = 255
@@ -128,6 +128,10 @@ def update_frame(width, step, v, frame, colour):
     frame[h:h+step,w:w+step] = 255
   elif colour == 'k':
     frame[h:h+step,w:w+step] = 0
+  elif colour == 'rand':
+    frame[h:h+step,w:w+step,0] = randint(0,255)
+    frame[h:h+step,w:w+step,1] = randint(0,255)
+    frame[h:h+step,w:w+step,2] = randint(0,255)
 
 def random_points(graph, img, step, percentage, start, target):
   vcount = graph.vcount()
@@ -311,8 +315,8 @@ def Astar(g, start, end):
 
   while len(opened) > 0:
     tmp_dist = fscore.copy()
-    for opened in closed:
-      tmp_dist[opened] = float('inf')
+    for q in closed:
+      tmp_dist[q] = float('inf')
 
     u = tmp_dist.index(min(tmp_dist))
     
@@ -371,7 +375,7 @@ class Ant:
     self.weight_sum = 0
 
 def antss(g: ig.Graph, start: int, end: int, 
-          number_of_generations=20, number_of_ants=50,
+          number_of_generations=20, number_of_ants=100,
           ph_evap_coef=0.1, ph_deposition=5,
           ph_influence=1, weight_influence=1):
   ''' 
@@ -394,13 +398,24 @@ def antss(g: ig.Graph, start: int, end: int,
   for e in g.es():
     e["pheromone"] = 1
 
+  best_gen_path = []
+  best_gen_path_weight = []
   for generation in range(number_of_generations):
     all_paths, all_paths_weight = ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influence)
       
     ## Pheromone update after each generation
     g = pheromone_update(g, ph_evap_coef, ph_deposition, all_paths, all_paths_weight)
+    
+    if len(all_paths) > 0:
+      best_gen_path.append(all_paths[all_paths_weight.index(min(all_paths_weight))])
+      best_gen_path_weight.append(sum([g.vs(v)["height"][0] for v in best_gen_path]))
+      log.debug("Best path this generation: " + str(best_gen_path_weight[-1]))
 
     # print(all_ways)
+  if len(best_gen_path) > 0:
+    return best_gen_path[best_gen_path_weight.index(min(best_gen_path_weight))]
+  else:
+    return []
   
   final_path = [start]
   visited = [start]
@@ -420,6 +435,11 @@ def antss(g: ig.Graph, start: int, end: int,
   return(final_path)
 
 def ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influence):
+  width = g["width"]
+  for v in g.vs():
+    v["distance"] = diag_dist(v.index, end, width)
+  g.vs[end]["distance"] = 0.0001
+  
   all_paths = []
   all_paths_weight = []
   ants = [Ant(id, start) for id in range(number_of_ants)]
@@ -431,7 +451,7 @@ def ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influ
       # log.debug("Posible ways: " + str(possible_ways))
 
       if len(possible_ways) == 0:
-        log.debug(f"Ant {ant.id} got lost. Path: " + str(ant.visited))
+        # log.debug(f"Ant {ant.id} got lost. Path: " + str(ant.visited))
         ants.remove(ant) # if ant is lost remove it from list
         continue
       

@@ -3,7 +3,6 @@ import numpy as np
 import logging as log
 from spmodule.graphVis import *
 from spmodule.splib import *
-from json import dumps as jdump
 
 log.basicConfig(level=log.DEBUG,
                 filename='sp.log', filemode='w', 
@@ -26,7 +25,7 @@ mountain_height = 5
 wall_percent = 30
 graph, img = generate_weighted_graph(width, height, step, start, end, no_mountains, mountain_height, wall_percent)
 
-ig.save(graph, "graphs/basic.graphml")
+# ig.save(graph, "graphs/basic.graphml")
 
 # for w,h in draw_line(10,2,30,33):
 #   graph.delete_edges(graph.incident(wh2vid(w,h,width)))
@@ -71,7 +70,9 @@ for v in path:
 # ph_evap_coef=0.01
 # ph_deposition=8000
 
-# ant_visualization(width, step, graph, img, start, end, number_of_ants, ph_influence, weight_influence, ph_evap_coef, ph_deposition)
+# ant_visualization(width, step, graph, img, start, end, 
+#                   number_of_ants, ph_influence, weight_influence, 
+#                   ph_evap_coef, ph_deposition)
 
   
 cv2.imshow('frame', np.uint8(img))

@@ -1,8 +1,8 @@
 # %%
+import cv2
 import igraph as ig 
 import logging as log
 from spmodule.splib import *
-from json import dumps as jdump
 from sys import stdout
 
 # remember to set level to WARNING before actual tests!
@@ -54,21 +54,19 @@ if False:
     ig.save(graph, "graphs/basic.graphml")
   except :
     log.exception("Could not load graph from file")
-else: 
+elif False: 
   width = 100
   height = 100
+  step = 16
 
   start = wh2vid(1,50, width)
   end =  wh2vid(999,40, width)
 
   graph = generate_graph(width, height)
 
-  # deleted_vs = []
   for w,h in draw_line(50,4,50,85):
     v = wh2vid(w,h,width)
     graph.delete_edges(graph.incident(v))
-    # deleted_vs.append(v)
-  # graph["deleted_vs"] = jdump(deleted_vs)
     
   for v in graph.vs():
     v["distance"] = np.linalg.norm(np.array(vid2wh(v.index, width)) - np.array(vid2wh(end, width)))
@@ -78,31 +76,72 @@ else:
       # e["weight"] = graph.vs[e.target]["distance"]
       e["weight"] = 1
   ig.save(graph, "graphs/basic.graphml")
+else:
+  width = 60
+  height = 40
+  step = 16
+
+  start = wh2vid(0,39, width)
+  end =  wh2vid(59,0, width)
+
+  no_mountains = 6
+  mountain_height = 5
+  wall_percent = 30
+  graph, img = generate_weighted_graph(width, height, step, start, end, no_mountains, mountain_height, wall_percent)
 
 if True:
+  LOG.setLevel(log.WARNING)
   target = end
   
   nnodes = width*height
   lprint("Test for " + str(nnodes) + " nodes")
   
   timer = Timer()
-  path_length = str(len(graph.get_shortest_paths(start,target)[0]))
-  lprint("Igraph default: " + str(timer.time()) + "s, path length: " + path_length)
-
-  path_length = str(len(bestfirst(graph,start,target)))
-  lprint("Best first greedy algorithm: " + str(timer.time()) + "s, path length: " + path_length)
   
-  path_length = str(len(bellfo(graph,start,target)))
-  lprint("Bellman-Ford: " + str(timer.time()) + "s, path length: " + path_length)
+  path_ig = graph.get_shortest_paths(start,target)[0]
+  time_ig = str(timer.time())
+  
+  path_grd = bestfirst(graph,start,target)
+  time_grd = str(timer.time())
+  
+  path_bf = bellfo(graph,start,target)
+  time_bf = str(timer.time())
+  
+  path_dj = dijkstra(graph,start,target)
+  time_dj = str(timer.time())
+  
+  path_as = Astar(graph,start,target)
+  time_as = str(timer.time())
+  
+  path_ant = antss(graph,start,target,50,400)
+  time_ant = str(timer.time())
+  
+  cost_ig = sum([graph.vs(v)["height"][0] for v in path_ig])
+  lprint("Igraph default: " + time_ig + "s, path cost: " + str(cost_ig))
 
-  # path_length = str(len(dijkstra(graph,start,target)))
-  # print("Dijkstra: " + str(timer.time()) + "s, path length: " + path_length)
+  cost_grd = sum([graph.vs(v)["height"][0] for v in path_grd])
+  lprint("Best first greedy algorithm: " + time_grd + "s, path cost: " + str(cost_grd))
+  
+  cost_bf = sum([graph.vs(v)["height"][0] for v in path_bf])
+  lprint("Bellman-Ford: " + time_bf + "s, path cost: " + str(cost_bf))
 
-  path_length = str(len(Astar(graph,start,target)))
-  lprint("A*: " + str(timer.time()) + "s, path length: " + path_length)
+  cost_dj = sum([graph.vs(v)["height"][0] for v in path_dj])
+  print("Dijkstra: " + time_dj + "s, path cost: " + str(cost_dj))
 
-  path_length = str(len(antss(graph,start,target,30)))
-  lprint("Ants: " + str(timer.time()) + "s, path length: " + path_length)
+  cost_as = sum([graph.vs(v)["height"][0] for v in path_as])
+  lprint("A*: " + time_as + "s, path cost: " + str(cost_as))
+
+  cost_ant = sum([graph.vs(v)["height"][0] for v in path_ant])
+  lprint("Ants: " + time_ant + "s, path cost: " + str(cost_ant))
+  
+  for path in [path_ig, path_grd, path_bf, path_dj, path_as, path_ant]:
+    for v in path:
+      update_frame(width, step, v ,img , 'w')
+      
+  cv2.imshow('frame', np.uint8(img))
+
+  if cv2.waitKey(0) == ord('q'):
+    cv2.destroyAllWindows()
 
   # LOG.setLevel(log.ERROR)
   # print (antss(graph,0,108,30))
