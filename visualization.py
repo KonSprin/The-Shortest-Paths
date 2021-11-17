@@ -50,29 +50,37 @@ graph, img = generate_weighted_graph(width, height, step, start, end, no_mountai
 # if True:
 #   ig.save(graph, "graphs/basic.graphml")
 
-print(sum([graph.vs(v)["height"][0] for v in dijkstra(graph, start, end)]))
+# print(sum([graph.vs(v)["height"][0] for v in dijkstra(graph, start, end)]))
 
-path = astar_visualization(width, step, graph, img, start, end)
-astart_cost = sum([graph.vs(v)["height"][0] for v in path])
-print(astart_cost)
-for v in path:
-  update_frame(width, step, v ,img, 'w')
+# path = astar_visualization(width, step, graph, img, start, end)
+# astart_cost = sum([graph.vs(v)["height"][0] for v in path])
+# print(astart_cost)
+# for v in path:
+#   update_frame(width, step, v ,img, 'w')
   
 path = greedy_visualization(width, step, graph, img, start, end)
 greedy_cost = sum([graph.vs(v)["height"][0] for v in path])
 print(greedy_cost)
+for e in graph.es():
+    e["pheromone"] = 1
+
 for v in path:
   update_frame(width, step, v ,img, 'w')
-  
-# number_of_ants = 100
-# ph_influence = 1
-# weight_influence = 3
-# ph_evap_coef=0.01
-# ph_deposition=8000
 
-# ant_visualization(width, step, graph, img, start, end, 
-#                   number_of_ants, ph_influence, weight_influence, 
-#                   ph_evap_coef, ph_deposition)
+pr = path[0]
+for v in path[1:]:
+  graph.es(graph.get_eid(pr,v))["pheromone"] = 900
+  pr = v
+  
+number_of_ants = 100
+ph_influence = 1
+weight_influence = 3
+ph_evap_coef=0.01
+ph_deposition=8000
+
+ant_visualization(width, step, graph, img, start, end, 
+                  number_of_ants, ph_influence, weight_influence, 
+                  ph_evap_coef, ph_deposition)
 
   
 cv2.imshow('frame', np.uint8(img))

@@ -400,6 +400,7 @@ def antss(g: ig.Graph, start: int, end: int,
 
   best_gen_path = []
   best_gen_path_weight = []
+  num_reached = 0
   for generation in range(number_of_generations):
     all_paths, all_paths_weight = ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influence)
       
@@ -411,12 +412,16 @@ def antss(g: ig.Graph, start: int, end: int,
       best_gen_path_weight.append(sum([g.vs(v)["height"][0] for v in best_gen_path]))
       log.debug("Best path this generation: " + str(best_gen_path_weight[-1]))
 
+    num_reached += len(all_paths)
     # print(all_ways)
-  if len(best_gen_path) > 0:
-    return best_gen_path[best_gen_path_weight.index(min(best_gen_path_weight))]
-  else:
-    return []
+  # if len(best_gen_path) > 0:
+  #   print(num_reached)
+  #   return best_gen_path[best_gen_path_weight.index(min(best_gen_path_weight))]
+  # else:
+  #   print(num_reached)
+  #   return []
   
+  print(num_reached)
   final_path = [start]
   visited = [start]
   current = start
@@ -446,30 +451,40 @@ def ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influ
   while len(ants) > 0:
     ## Edge selection for each ant 
     for ant in ants:
-      # log.info("Generaion: " + str(generation) + " Ant: " + str(ant.id) + " Position: " + str(ant.position))
       possible_ways = setsub(g.neighbors(ant.position), ant.visited) # ant can go to vertice that have not been in before
-      # log.debug("Posible ways: " + str(possible_ways))
-
+      # possible_ways = g.neighbors(ant.position)
+      
       if len(possible_ways) == 0:
         # log.debug(f"Ant {ant.id} got lost. Path: " + str(ant.visited))
-        ants.remove(ant) # if ant is lost remove it from list
+        # if ant is lost remove it from list and add negative ph
+        all_paths.append(ant.visited)
+        # all_paths_weight.append(ant.weight_sum)
+        # ants.remove(ant)
+        # reached.append(-1)
         continue
+      elif len(possible_ways) == 1:
+         the_way = possible_ways[0]
+      else:
+        # calculation of probability of each way
+        ph_sum = 0
+        way_distribiution_temp = []
+        for way in possible_ways:
+          ph = g.es(g.get_eid(ant.position, way))["pheromone"][0] ** ph_influence
+          weight = g.vs[way]["distance"] ** weight_influence
+          ph_sum += ph/weight
+
+          way_distribiution_temp.append(ph/weight)
+        # way_distribiution = [wd - min(way_distribiution) + 1 for wd in way_distribiution] # normalize the shit out of this
+        # way_distribiution = [(w - min(way_distribiution_temp)) for w in way_distribiution_temp]
+        # way_distribiution = [w/ph_sum for w in way_distribiution_temp]
+        # way_distribiution1 = [(w/max(way_distribiution_temp))/ph_sum for w in way_distribiution_temp]
+        # way_distribiution2 = [(w - min(way_distribiution_temp)*0.99)/max(way_distribiution_temp)/ph_sum for w in way_distribiution_temp]
+        way_distribiution = [(w - min(way_distribiution_temp))/ph_sum for w in way_distribiution_temp]
+        the_way = choices(possible_ways, way_distribiution)[0] # a way chosen by ant based on pheromone and weight 
+        # ph_sum = sum([ g.es(g.get_eid(ant.position, w))["pheromone"][0] for w in possible_ways ])
+        # way_distribiution = [ (g.es(g.get_eid(ant.position, w))["pheromone"][0] / g.es(g.get_eid(ant.position, w))["weight"][0] ) / ph_sum for w in possible_ways ]
       
-      # calculation of probability of each way
-      ph_sum = 0
-      way_distribiution_temp = []
-      for way in possible_ways:
-        ph = g.es(g.get_eid(ant.position, way))["pheromone"][0] ** ph_influence
-        weight = g.vs[way]["distance"] ** weight_influence
-        ph_sum += ph/weight
-
-        way_distribiution_temp.append(ph/weight)
-      way_distribiution = [w / ph_sum for w in way_distribiution_temp]
-
-      # ph_sum = sum([ g.es(g.get_eid(ant.position, w))["pheromone"][0] for w in possible_ways ])
-      # way_distribiution = [ (g.es(g.get_eid(ant.position, w))["pheromone"][0] / g.es(g.get_eid(ant.position, w))["weight"][0] ) / ph_sum for w in possible_ways ]
-      the_way = choices(possible_ways, way_distribiution)[0] # a way chosen by ant based on pheromone and weight 
-      ant.weight_sum = ant.weight_sum + g.vs[the_way]["distance"]
+      ant.weight_sum = ant.weight_sum + g.vs[the_way]["height"]
       ant.visited.append(the_way)
       ant.position = the_way
 
@@ -479,7 +494,7 @@ def ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influ
         all_paths.append(ant.visited)
         all_paths_weight.append(ant.weight_sum)
         ants.remove(ant)
-  return all_paths,all_paths_weight
+        return all_paths,all_paths_weight
 
 def pheromone_update(g, ph_evap_coef, ph_deposition, all_paths, all_paths_weight):
   for e in g.es():

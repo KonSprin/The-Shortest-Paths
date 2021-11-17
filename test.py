@@ -113,7 +113,7 @@ if True:
   path_as = Astar(graph,start,target)
   time_as = str(timer.time())
   
-  path_ant = antss(graph,start,target,50,400)
+  path_ant = antss(graph,start,target,20,100)
   time_ant = str(timer.time())
   
   cost_ig = sum([graph.vs(v)["height"][0] for v in path_ig])
