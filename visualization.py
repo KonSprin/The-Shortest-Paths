@@ -17,12 +17,12 @@ width = 60
 height = 40
 step = 16
 
-start = wh2vid(0,39, width)
-end =  wh2vid(59,0, width)
+start = wh2vid(0,0, width)
+end =  wh2vid(59,39, width)
 
 no_mountains = 6
 mountain_height = 5
-wall_percent = 30
+wall_percent = 3
 graph, img = generate_weighted_graph(width, height, step, start, end, no_mountains, mountain_height, wall_percent)
 
 # ig.save(graph, "graphs/basic.graphml")
@@ -58,25 +58,25 @@ graph, img = generate_weighted_graph(width, height, step, start, end, no_mountai
 # for v in path:
 #   update_frame(width, step, v ,img, 'w')
   
-path = greedy_visualization(width, step, graph, img, start, end)
-greedy_cost = sum([graph.vs(v)["height"][0] for v in path])
-print(greedy_cost)
-for e in graph.es():
-    e["pheromone"] = 1
+# path = greedy_visualization(width, step, graph, img, start, end)
+# greedy_cost = sum([graph.vs(v)["height"][0] for v in path])
+# print(greedy_cost)
+# for e in graph.es():
+#     e["pheromone"] = 1
 
-for v in path:
-  update_frame(width, step, v ,img, 'w')
+# for v in path:
+#   update_frame(width, step, v ,img, 'w')
 
-pr = path[0]
-for v in path[1:]:
-  graph.es(graph.get_eid(pr,v))["pheromone"] = 900
-  pr = v
+# pr = path[0]
+# for v in path[1:]:
+#   graph.es(graph.get_eid(pr,v))["pheromone"] = 900
+#   pr = v
   
-number_of_ants = 100
+number_of_ants = 10
 ph_influence = 1
 weight_influence = 3
-ph_evap_coef=0.01
-ph_deposition=8000
+ph_evap_coef=0.05
+ph_deposition=80
 
 ant_visualization(width, step, graph, img, start, end, 
                   number_of_ants, ph_influence, weight_influence, 

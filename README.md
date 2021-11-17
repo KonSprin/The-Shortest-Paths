@@ -25,6 +25,7 @@ This is source code for my engineer degree diploma.
     - [A*-based Pathfinding in Modern Computer Games](https://www.researchgate.net/profile/Xiao-Cui-12/publication/267809499_A-based_Pathfinding_in_Modern_Computer_Games/links/54fd73740cf270426d125adc/A-based-Pathfinding-in-Modern-Computer-Games.pdf)
     - [A* Heuristicsc](http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html)
     - [Genetic algorithms](https://towardsdatascience.com/introduction-to-genetic-algorithms-including-example-code-e396e98d8bf3)
+    - [Solving a unique Shortest Path problem using Ant Colony Optimisation](https://www.researchgate.net/publication/254455826_Solving_a_unique_Shortest_Path_problem_using_Ant_Colony_Optimisation)
 2. Code
     - [Visualising Graph Data with Python-igraph](https://towardsdatascience.com/visualising-graph-data-with-python-igraph-b3cc81a495cf)
     - [igraph API ](https://igraph.org/python/doc/api/)

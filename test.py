@@ -86,10 +86,10 @@ else:
 
   no_mountains = 6
   mountain_height = 5
-  wall_percent = 30
+  wall_percent = 0
   graph, img = generate_weighted_graph(width, height, step, start, end, no_mountains, mountain_height, wall_percent)
 
-if True:
+if False:
   LOG.setLevel(log.WARNING)
   target = end
   
@@ -100,22 +100,29 @@ if True:
   
   path_ig = graph.get_shortest_paths(start,target)[0]
   time_ig = str(timer.time())
+  lprint("Igraph default finished")
   
   path_grd = bestfirst(graph,start,target)
   time_grd = str(timer.time())
+  lprint("Best first greedy algorithm finished")
   
   path_bf = bellfo(graph,start,target)
   time_bf = str(timer.time())
+  lprint("Bellman-Ford finished")
   
   path_dj = dijkstra(graph,start,target)
   time_dj = str(timer.time())
+  lprint("Dijkstra finished")
   
   path_as = Astar(graph,start,target)
   time_as = str(timer.time())
+  lprint("A* finished")
   
   path_ant = antss(graph,start,target,20,100)
   time_ant = str(timer.time())
+  lprint("Ants finished")
   
+         
   cost_ig = sum([graph.vs(v)["height"][0] for v in path_ig])
   lprint("Igraph default: " + time_ig + "s, path cost: " + str(cost_ig))
 
@@ -126,7 +133,7 @@ if True:
   lprint("Bellman-Ford: " + time_bf + "s, path cost: " + str(cost_bf))
 
   cost_dj = sum([graph.vs(v)["height"][0] for v in path_dj])
-  print("Dijkstra: " + time_dj + "s, path cost: " + str(cost_dj))
+  lprint("Dijkstra: " + time_dj + "s, path cost: " + str(cost_dj))
 
   cost_as = sum([graph.vs(v)["height"][0] for v in path_as])
   lprint("A*: " + time_as + "s, path cost: " + str(cost_as))
@@ -148,6 +155,18 @@ if True:
   # t5 = time()
   # print("Ants with ERROR log: " + str(t5 - t4))
 # %%
+
+if True:
+  target = end
+
+  path_ant = antss(graph,start,target,7,1)
+  for v in path_ant:
+    update_frame(width, step, v ,img , 'w')
+  cv2.imshow('frame', np.uint8(img))
+
+  if cv2.waitKey(0) == ord('q'):
+    cv2.destroyAllWindows()
+    
 if False:
   LOG.setLevel(log.ERROR)
   # Accuracy tester for Ants #
