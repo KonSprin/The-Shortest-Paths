@@ -89,7 +89,7 @@ else:
   wall_percent = 0
   graph, img = generate_weighted_graph(width, height, step, start, end, no_mountains, mountain_height, wall_percent)
 
-if False:
+if True:
   LOG.setLevel(log.WARNING)
   target = end
   
@@ -156,7 +156,7 @@ if False:
   # print("Ants with ERROR log: " + str(t5 - t4))
 # %%
 
-if True:
+if False:
   target = end
 
   path_ant = antss(graph,start,target,7,1)

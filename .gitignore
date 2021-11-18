@@ -1,7 +1,9 @@
 # Folders
 __pycache__/
 .vscode/
-AS internet structure/
+graphs
+data
+
 # Environments
 venv/
 

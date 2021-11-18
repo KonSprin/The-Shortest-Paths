@@ -63,6 +63,21 @@ def generate_weighted_graph(width, height, step, start, end, no_mountains, mount
   update_frame(width, step, start, img, 'b')
   return graph,img
 
+def generate_weighted_graph_noimg(width, height, start, end, no_mountains, mountain_height, wall_percent):
+  path = [[]]
+  while path == [[]]:
+    graph = generate_graph(width, height)
+    add_mountains_noimg(graph, sample(range(width*height), no_mountains), mountain_height)
+
+    random_points_noimg(graph, wall_percent, start, end)
+    try: 
+      path = graph.get_shortest_paths(start, end)
+    except RuntimeWarning: 
+      log.warning("lmao")
+      pass
+
+  return graph
+
 def draw_line(x0, y0, x1, y1):
   line=[(x0, y0)]
   dx = np.abs(x1-x0)
@@ -160,6 +175,30 @@ def random_points(graph, img, step, percentage, start, target):
     w, h = vid2wh(v, graph["width"])
     img[h*step:h*step+step,w*step:w*step+step,2] = 255
   
+def random_points_noimg(graph, percentage, start, target):
+  vcount = graph.vcount()
+  
+  v = choose_v(vcount, [start, target])
+      
+  deleted = []  
+  while len(deleted) < (vcount * percentage / 100):
+    v_nei = graph.neighbors(v)
+    
+    if decision(0.1) or len(v_nei) == 0:
+      v = choose_v(vcount, [start, target] + deleted)
+      continue
+    
+    graph.delete_edges(graph.incident(v))
+    deleted.append(v)
+    for nei in v_nei:
+      if nei in [start, target]:
+        v_nei.remove(nei)
+    if len(v_nei) == 0:
+      v = choose_v(vcount, [start, target] + deleted)
+      continue
+    v = v_nei[randint(0, len(v_nei)-1)]
+
+
 def decision(probability):
   return random() < probability
   
@@ -207,6 +246,15 @@ def add_mountains(graph, img, mountain_list, height, step):
   for v in graph.vs():
     w, h = vid2wh(v.index, graph["width"])
     img[h*step:h*step+step,w*step:w*step+step,2] = v["height"] * scalar
+
+def add_mountains_noimg(graph, mountain_list, height):  
+  for mountain in mountain_list:
+    graph.vs(mountain)["height"] = height
+    
+  smoothen_terrain(graph)
+  
+  for e in graph.es():
+    e["weight"] = (graph.vs(e.target)["height"][0] + graph.vs(e.source)["height"][0]) / 2
 
    
 class Timer:
