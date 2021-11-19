@@ -40,3 +40,4 @@ This is source code for my engineer degree diploma.
     - [Shortest Path Problem](https://en.wikipedia.org/wiki/Shortest_path_problem)
 5. Other
     - [Ant and Slime simulations](https://www.youtube.com/watch?v=X-iSQQgOd1A)
+    - [Deadlock idea](https://www.frontiersin.org/articles/10.3389/fnbot.2019.00015/full)

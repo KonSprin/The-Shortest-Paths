@@ -70,7 +70,7 @@ graph, img = generate_weighted_graph(width, height, step, start, end, no_mountai
 # pr = path[0]
 # for v in path[1:]:
 #   graph.es(graph.get_eid(pr,v))["pheromone"] = 900
-#   pr = v
+#   pr =  v
   
 number_of_ants = 10
 ph_influence = 1

@@ -145,21 +145,24 @@ def ant_visualization(width, step, graph, img, start, end, number_of_ants, ph_in
   # tmp_frame = np.zeros((frame_height,frame_width,1), np.uint8)
     frame = img
 
-    for e in graph.es():
-      s = e.source
-      t = e.target
-      update_frame(width, step, s, frame, np.uint8(e["pheromone"]))
-      update_frame(width, step, t, frame, np.uint8(e["pheromone"]))
-    # for path in all_paths:
-    #   for v in path:
-    #     update_frame(width, step, v, frame, 10)
-    #   cv2.imshow('frame', np.uint8(frame))
-    #   if cv2.waitKey(1) == ord('q'):
-    #     break
+    # for e in graph.es():
+    #   s = e.source
+    #   t = e.target
+    #   update_frame(width, step, s, frame, np.uint8(e["pheromone"]))
+    #   update_frame(width, step, t, frame, np.uint8(e["pheromone"]))
+    # frmax = frame[:,:,1].max()
+    # print(frmax)
+    # frame[:,:,1] =  (frame[:,:,1]/frmax) * 254
+    
+    
+    for path in all_paths:
+      for v in path:
+        update_frame(width, step, v, frame, 10)
+      cv2.imshow('frame', np.uint8(frame))
+      if cv2.waitKey(1) == ord('q'):
+        break
       
-    frmax = frame[:,:,1].max()
-    print(frmax)
-    frame[:,:,1] =  (frame[:,:,1]/frmax) * 254
+
 
   # w, h = [x * step for x in vid2wh(s, width)]
   # tmp_frame[h:h+step,w:w+step] += e["pheromone"]

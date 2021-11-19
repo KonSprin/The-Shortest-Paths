@@ -86,11 +86,11 @@ else:
 
   no_mountains = 6
   mountain_height = 5
-  wall_percent = 0
+  wall_percent = 5
   graph, img = generate_weighted_graph(width, height, step, start, end, no_mountains, mountain_height, wall_percent)
 
 if True:
-  LOG.setLevel(log.WARNING)
+  LOG.setLevel(log.DEBUG)
   target = end
   
   nnodes = width*height
@@ -106,9 +106,9 @@ if True:
   time_grd = str(timer.time())
   lprint("Best first greedy algorithm finished")
   
-  path_bf = bellfo(graph,start,target)
-  time_bf = str(timer.time())
-  lprint("Bellman-Ford finished")
+  # path_bf = bellfo(graph,start,target)
+  # time_bf = str(timer.time())
+  # lprint("Bellman-Ford finished")
   
   path_dj = dijkstra(graph,start,target)
   time_dj = str(timer.time())
@@ -118,7 +118,7 @@ if True:
   time_as = str(timer.time())
   lprint("A* finished")
   
-  path_ant = antss(graph,start,target,20,100)
+  path_ant = antss(graph,start,target,10,20)
   time_ant = str(timer.time())
   lprint("Ants finished")
   
@@ -129,8 +129,8 @@ if True:
   cost_grd = sum([graph.vs(v)["height"][0] for v in path_grd])
   lprint("Best first greedy algorithm: " + time_grd + "s, path cost: " + str(cost_grd))
   
-  cost_bf = sum([graph.vs(v)["height"][0] for v in path_bf])
-  lprint("Bellman-Ford: " + time_bf + "s, path cost: " + str(cost_bf))
+  # cost_bf = sum([graph.vs(v)["height"][0] for v in path_bf])
+  # lprint("Bellman-Ford: " + time_bf + "s, path cost: " + str(cost_bf))
 
   cost_dj = sum([graph.vs(v)["height"][0] for v in path_dj])
   lprint("Dijkstra: " + time_dj + "s, path cost: " + str(cost_dj))
@@ -141,7 +141,7 @@ if True:
   cost_ant = sum([graph.vs(v)["height"][0] for v in path_ant])
   lprint("Ants: " + time_ant + "s, path cost: " + str(cost_ant))
   
-  for path in [path_ig, path_grd, path_bf, path_dj, path_as, path_ant]:
+  for path in [path_ig, path_grd, path_dj, path_as, path_ant]:
     for v in path:
       update_frame(width, step, v ,img , 'w')
       

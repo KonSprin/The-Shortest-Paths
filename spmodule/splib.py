@@ -421,6 +421,7 @@ class Ant:
     self.visited = [start]
     self.position = start
     self.weight_sum = 0
+    self.deadlocked = []
 
 def antss(g: ig.Graph, start: int, end: int, 
           number_of_generations=20, number_of_ants=100,
@@ -468,15 +469,25 @@ def antss(g: ig.Graph, start: int, end: int,
     
     lprint(f"Ended generation {generation} with {len(all_paths)} paths found way")
     
+    if len(all_paths) > 0:
+      best_gen_path_index = all_paths_weight.index(min(all_paths_weight))
+      best_gen_path.append(all_paths[best_gen_path_index])
+      best_gen_path_weight.append(all_paths_weight[best_gen_path_index])
+      log.debug("Best path this generation: " + str(best_gen_path_weight[-1]))
+
+      num_reached += len(all_paths)
+    
     ## Pheromone update after each generation
     g = pheromone_update(g, ph_evap_coef, ph_deposition, all_paths, all_paths_weight)
+    # g = minmax_pheromone_update(g, ph_evap_coef, ph_deposition*100, remove_loops(g, best_gen_path[-1]), best_gen_path_weight[-1])
     
     # ph_influence=ph_influence*1.1
     # weight_influence=weight_influence*0.9
     
     if len(all_paths) > 0:
-      best_gen_path.append(all_paths[all_paths_weight.index(min(all_paths_weight))])
-      best_gen_path_weight.append(sum([g.vs(v)["height"][0] for v in best_gen_path]))
+      best_gen_path_index = all_paths_weight.index(min(all_paths_weight))
+      best_gen_path.append(all_paths[best_gen_path_index])
+      best_gen_path_weight.append(all_paths_weight[best_gen_path_index])
       log.debug("Best path this generation: " + str(best_gen_path_weight[-1]))
 
       num_reached += len(all_paths)
@@ -514,16 +525,17 @@ def ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influ
   while len(ants) > 0:
     ## Edge selection for each ant 
     for ant in ants:
-      # possible_ways = setsub(g.neighbors(ant.position), ant.visited) # ant can go to vertice that have not been in before
-      possible_ways = g.neighbors(ant.position)
+      possible_ways = setsub(g.neighbors(ant.position), ant.visited + ant.deadlocked) # ant can go to vertice that have not been in before
+      # possible_ways = g.neighbors(ant.position)
       
       if len(possible_ways) == 0:
         # log.debug(f"Ant {ant.id} got lost. Path: " + str(ant.visited))
-        # if ant is lost remove it from list and add negative ph
-        # all_paths.append(ant.visited)
-        # all_paths_weight.append(ant.weight_sum)
-        ants.remove(ant)
-        # reached.append(-1)
+        
+        ant.weight_sum = ant.weight_sum - g.vs[ant.visited[-1]]["height"]
+        ant.deadlocked.append(ant.visited.pop())
+        ant.position = ant.visited[-1]
+        
+        # ants.remove(ant)
         continue
       elif len(possible_ways) == 1:
          the_way = possible_ways[0]
@@ -566,10 +578,11 @@ def pheromone_update(g, ph_evap_coef, ph_deposition, all_paths, all_paths_weight
     e["ph_update"] = 0
 
   for path, weight in zip(all_paths, all_paths_weight):
-    length = len(path)
+    short_path = remove_loops(g, path)
+    length = len(short_path)
     for i in range(length - 1):
-      hop = path[i]
-      next_hop = path[i+1]
+      hop = short_path[i]
+      next_hop = short_path[i+1]
       # g.es(x)["y"] returs one element list so You need to use [0] but in order to write to it You can't do that. It's stupid
       # g.es(g.get_eid(hop, next_hop))["pheromone"] = g.es(g.get_eid(hop, next_hop))["pheromone"][0] * (1 - ph_evap_coef) + ph_deposition/weight
       g.es(g.get_eid(hop, next_hop))["ph_update"] = g.es(g.get_eid(hop, next_hop))["ph_update"][0] + ph_deposition/weight
@@ -578,3 +591,39 @@ def pheromone_update(g, ph_evap_coef, ph_deposition, all_paths, all_paths_weight
     e["pheromone"] = e["pheromone"] * (1 - ph_evap_coef) + e["ph_update"]
   
   return g
+
+def minmax_pheromone_update(g, ph_evap_coef, ph_deposition, path, path_weight):
+  for e in g.es():
+    e["ph_update"] = 0
+
+  length = len(path)
+  for i in range(length - 1):
+    hop = path[i]
+    next_hop = path[i+1]
+    # g.es(x)["y"] returs one element list so You need to use [0] but in order to write to it You can't do that. It's stupid
+    # g.es(g.get_eid(hop, next_hop))["pheromone"] = g.es(g.get_eid(hop, next_hop))["pheromone"][0] * (1 - ph_evap_coef) + ph_deposition/weight
+    g.es(g.get_eid(hop, next_hop))["ph_update"] = g.es(g.get_eid(hop, next_hop))["ph_update"][0] + ph_deposition/path_weight
+
+  for e in g.es():
+    e["pheromone"] = e["pheromone"] * (1 - ph_evap_coef) + e["ph_update"]
+  
+  return g
+
+def remove_loops(g, path):
+  tmp_path = [path[0]]
+  i = 1
+  while tmp_path[-1] != path[-1]:
+    node = path[i]
+    tmp_path.append(node)
+    
+    possible_shorts = []
+    for neighbor in g.neighbors(node):
+      if neighbor in path[i+2:]:
+        possible_shorts.append(path.index(neighbor))
+        
+    if len(possible_shorts) > 0:
+      i = max(possible_shorts)
+    else: 
+      i += 1
+      
+  return tmp_path
