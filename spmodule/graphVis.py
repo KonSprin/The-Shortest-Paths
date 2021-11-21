@@ -9,7 +9,7 @@ def astar_visualization(width, step, graph, img, start, end):
   
   previus = [[]] * vn
 
-  Q = [start]
+  opened = [start]
   closed = []
 
   dist = [float("inf")] * vn
@@ -20,11 +20,14 @@ def astar_visualization(width, step, graph, img, start, end):
   fscore[start] = diag_dist(start, end, width) * (1+p)
 
   image_list = []
-  while len(Q) > 0:
-    tmp_dist = fscore.copy()
-    for q in closed:
-      tmp_dist[q] = float('inf')
-    
+  while len(opened) > 0:
+    # tmp_dist = fscore.copy()
+    # for q in closed:
+    #   tmp_dist[q] = float('inf')
+
+    tmp_dist = [float("inf")] * vn
+    for q in opened:
+      tmp_dist[q] = fscore[q]
     # tmp_dist = []
     # for q in range(vn):
     #   if q in Q:
@@ -36,7 +39,7 @@ def astar_visualization(width, step, graph, img, start, end):
     if u == end:
       path = reconstruct_path(start, u, previus)
       frame = img.copy()
-      for v in Q:
+      for v in opened:
         update_frame(width, step, v, frame, 'g')
       for v in closed:
         update_frame(width, step, v, frame, 'b')
@@ -47,7 +50,7 @@ def astar_visualization(width, step, graph, img, start, end):
       
       return path, image_list
 
-    Q.remove(u)
+    opened.remove(u)
     closed.append(u)
     for v in graph.neighbors(u):
       if v in closed:
@@ -60,12 +63,12 @@ def astar_visualization(width, step, graph, img, start, end):
         fscore[v] = alt + diag_dist(v, end, width) * (1+p)
     # fscore[v] = alt
         previus[v] = u
-        if v not in Q:
-            Q.append(v)
+        if v not in opened:
+            opened.append(v)
     
     frame = img
 
-    for v in Q:
+    for v in opened:
       update_frame(width, step, v, frame, 'g')
 
     for v in closed:

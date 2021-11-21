@@ -3,6 +3,7 @@ __pycache__/
 .vscode/
 graphs
 data
+dumps 
 
 # Environments
 venv/

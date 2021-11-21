@@ -54,40 +54,34 @@ if False:
     ig.save(graph, "graphs/basic.graphml")
   except :
     log.exception("Could not load graph from file")
-elif False: 
+elif True: 
   width = 100
-  height = 100
-  step = 16
-
-  start = wh2vid(1,50, width)
-  end =  wh2vid(999,40, width)
-
-  graph = generate_graph(width, height)
-
-  for w,h in draw_line(50,4,50,85):
-    v = wh2vid(w,h,width)
-    graph.delete_edges(graph.incident(v))
-    
-  for v in graph.vs():
-    v["distance"] = np.linalg.norm(np.array(vid2wh(v.index, width)) - np.array(vid2wh(end, width)))
-  graph.vs[end]["distance"] = 0.1
-
-  for e in graph.es():
-      # e["weight"] = graph.vs[e.target]["distance"]
-      e["weight"] = 1
-  ig.save(graph, "graphs/basic.graphml")
-else:
-  width = 100
-  height = 100
+  height = 50
   step = 10
 
-  start = wh2vid(0,0, width)
-  end =  wh2vid(99,99, width)
+  start = wh2vid(5,5, width)
+  end =  wh2vid(95,45, width)
+
+  graph = ig.load("graphs/optimization.graphml")
+  
+  with open("graphs/optimization.npy", 'rb') as f:
+    img = np.load(f)
+else:
+  width = 100
+  height = 50
+  step = 10
+
+  start = wh2vid(5,5, width)
+  end =  wh2vid(95,45, width)
 
   no_mountains = 6
-  mountain_height = 5
-  wall_percent = 5
+  mountain_height = 10
+  wall_percent = 15
   graph, img = generate_weighted_graph(width, height, step, start, end, no_mountains, mountain_height, wall_percent)
+  
+  ig.save(graph, "graphs/optimization.graphml")
+  with open("graphs/optimization.npy", 'wb') as f:
+    np.save(f, img)
 
 if True:
   LOG.setLevel(log.DEBUG)

@@ -58,7 +58,7 @@ def generate_weighted_graph(width, height, step, start, end, no_mountains, mount
     graph = generate_graph(width, height)
     img = np.zeros((frame_height,frame_width,3), np.uint32)
     # add_mountains(graph, img, sample(range(width*height), no_mountains), mountain_height, step)
-    add_perlin_mountains(graph,img,height, step, width/3)
+    add_perlin_mountains(graph,img,mountain_height, step, width/3)
 
     random_points(graph, img, step, wall_percent, start, end)
     try: 
@@ -119,7 +119,10 @@ def diag_dist(start, goal, width):
   goal_x, goal_y = vid2wh(goal, width)
   dx = abs(start_x - goal_x)
   dy = abs(start_y - goal_y)
-  return (dx + dy) - 0.585786* min(dx, dy) 
+  if dx > dy:
+    return 14*dy + 10*(dx-dy)
+  return 14*dx + 10*(dy-dx)
+  # return ((dx + dy) - 0.585786* min(dx, dy)) * 10
   # (D2 - 2 * D) * min(dx, dy) - There are min(dx, dy) diagonal steps, and each one costs D2 but saves you 2x D non-diagonal steps.
 
 def eucl_dist(start, goal, width):
@@ -295,7 +298,7 @@ class Timer:
 
 def lprint(message: str):
   print(message)
-  log.debug(message)
+  log.info(message)
 
 ## Pathfinding functions ##
 
@@ -388,10 +391,13 @@ def Astar(g, start, end):
   fscore[start] = diag_dist(start, end, g["width"]) * (1+p)
 
   while len(opened) > 0:
-    tmp_dist = fscore.copy()
-    for q in closed:
-      tmp_dist[q] = float('inf')
+    # tmp_dist = fscore.copy()
+    # for q in closed:
+    #   tmp_dist[q] = float('inf')
 
+    tmp_dist = [float("inf")] * vn
+    for q in opened:
+      tmp_dist[q] = fscore[q]
     u = tmp_dist.index(min(tmp_dist))
     
     if u == end:
@@ -452,7 +458,7 @@ class Ant:
 def antss(g: ig.Graph, start: int, end: int, 
           number_of_generations=20, number_of_ants=100,
           ph_evap_coef=0.05, 
-          ph_influence=1, weight_influence=1, visibility_influence=2):
+          ph_influence=1, weight_influence=1, visibility_influence=1):
   ''' 
   This function implements the Ant colony algorithm inspired by Ants
     Each generation some number of ants is released. 

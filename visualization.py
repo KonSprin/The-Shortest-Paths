@@ -66,7 +66,7 @@ else:
 
 # print(sum([graph.vs(v)["height"][0] for v in dijkstra(graph, start, end)]))
 
-# path, image_list = astar_visualization(width, step, graph, img, start, end)
+path, image_list = astar_visualization(width, step, graph, img, start, end)
 # astart_cost = sum([graph.vs(v)["height"][0] for v in path])
 # print(astart_cost)
 
@@ -87,19 +87,19 @@ else:
 # for v in path:
 #   update_frame(width, step, v ,img, 'w')
 
-number_of_ants = 20
-ph_evap_coef=0.05
+# number_of_ants = 20
+# ph_evap_coef=0.05
 
-ph_influence = 1
-weight_influence = 1
-visibility_influence  = 2
+# ph_influence = 1
+# weight_influence = 1
+# visibility_influence  = 2
 
-image_list = ant_visualization(width, step, graph, img, start, end, 
-                  number_of_ants, ph_influence, weight_influence,
-                  ph_evap_coef, visibility_influence)
+# image_list = ant_visualization(width, step, graph, img, start, end, 
+#                   number_of_ants, ph_influence, weight_influence,
+#                   ph_evap_coef, visibility_influence)
 
-
-imageio.mimsave('graphs/ants.gif', image_list, fps=30)
+print(len(image_list))
+imageio.mimsave('graphs/a_star2.gif', image_list, fps=30)
   
 cv2.imshow('frame', np.uint8(img))
 
