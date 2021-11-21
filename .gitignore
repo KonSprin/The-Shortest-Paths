@@ -8,7 +8,6 @@ data
 venv/
 
 # Extensions
-*.png
 *.txt
 *.log
 *.graphml

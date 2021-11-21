@@ -126,7 +126,7 @@ def eucl_dist(start, goal, width):
   return np.linalg.norm(np.array(vid2wh(start, width)) - np.array(vid2wh(goal, width)))
 
 def vid2wh(v, width):
-  w = (v % width)
+  w = int(v % width)
   h = int(floor(v/width))
   return w,h
 
@@ -141,10 +141,13 @@ def setsub(l1, l2):
 def update_frame(width, step, v, frame, colour = 'rand'):
   w, h = [x * step for x in vid2wh(v, width)]
   if colour == 'r': 
+    frame[h:h+step,w:w+step] = 0
     frame[h:h+step,w:w+step,2] = 255
   elif colour == 'g':
+    frame[h:h+step,w:w+step] = 0
     frame[h:h+step,w:w+step,1] = 255
   elif colour == 'b':
+    frame[h:h+step,w:w+step] = 0
     frame[h:h+step,w:w+step,0] = 255
   elif colour == 'w':
     frame[h:h+step,w:w+step] = 255
@@ -180,7 +183,7 @@ def random_points(graph, img, step, percentage, start, target):
 
   for v in deleted:
     w, h = vid2wh(v, graph["width"])
-    img[h*step:h*step+step,w*step:w*step+step,2] = 255
+    img[h*step:h*step+step,w*step:w*step+step,:] = 0
   
 def random_points_noimg(graph, percentage, start, target):
   vcount = graph.vcount()
@@ -257,13 +260,13 @@ def add_mountains(graph, img, mountain_list, height, step):
 def add_perlin_mountains(graph, img, height, step, scale = 30.0, octaves = 6, persistence = 0.5, lacunarity = 2.0):
   width = graph["width"]
   shape = (int(graph.vcount()/width), width)
-  
+  img[:,:,2] = 255
   for i in range(shape[0]):
     for j in range(shape[1]):
       nois = noise.pnoise2(i/scale, j/scale, octaves=octaves, 
                                   persistence=persistence, lacunarity=lacunarity, 
                                   repeatx=1024, repeaty=1024, base=0)
-      img[i*step:i*step+step,j*step:j*step+step,2] = np.uint32((nois + 0.5) * height)
+      img[i*step:i*step+step,j*step:j*step+step,0:2] = 255 - np.uint32((nois + 0.5) * 255)
       graph.vs(wh2vid(j,i,width))["height"] = (nois + 0.5) * height
   
   for e in graph.es():
