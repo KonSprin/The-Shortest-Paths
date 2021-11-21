@@ -77,12 +77,12 @@ elif False:
       e["weight"] = 1
   ig.save(graph, "graphs/basic.graphml")
 else:
-  width = 60
-  height = 40
-  step = 16
+  width = 100
+  height = 100
+  step = 10
 
-  start = wh2vid(0,39, width)
-  end =  wh2vid(59,0, width)
+  start = wh2vid(0,0, width)
+  end =  wh2vid(99,99, width)
 
   no_mountains = 6
   mountain_height = 5
@@ -123,22 +123,22 @@ if True:
   lprint("Ants finished")
   
          
-  cost_ig = sum([graph.vs(v)["height"][0] for v in path_ig])
+  cost_ig = path_cost(graph, path_ig)
   lprint("Igraph default: " + time_ig + "s, path cost: " + str(cost_ig))
 
-  cost_grd = sum([graph.vs(v)["height"][0] for v in path_grd])
+  cost_grd = path_cost(graph, path_grd)
   lprint("Best first greedy algorithm: " + time_grd + "s, path cost: " + str(cost_grd))
   
-  # cost_bf = sum([graph.vs(v)["height"][0] for v in path_bf])
+  # cost_bf = path_cost(graph, path_bf)
   # lprint("Bellman-Ford: " + time_bf + "s, path cost: " + str(cost_bf))
 
-  cost_dj = sum([graph.vs(v)["height"][0] for v in path_dj])
+  cost_dj = path_cost(graph, path_dj)
   lprint("Dijkstra: " + time_dj + "s, path cost: " + str(cost_dj))
 
-  cost_as = sum([graph.vs(v)["height"][0] for v in path_as])
+  cost_as = path_cost(graph, path_as)
   lprint("A*: " + time_as + "s, path cost: " + str(cost_as))
 
-  cost_ant = sum([graph.vs(v)["height"][0] for v in path_ant])
+  cost_ant = path_cost(graph, path_ant)
   lprint("Ants: " + time_ant + "s, path cost: " + str(cost_ant))
   
   for path in [path_ig, path_grd, path_dj, path_as, path_ant]:

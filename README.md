@@ -25,6 +25,9 @@ I've implemented a couple of algorithms:
     - [Search-Based Optimal Solvers for the MAPP](https://www.aaai.org/ocs/index.php/SOCS/SOCS17/paper/viewFile/15781/15053)
     - [Genetic algorithms](https://towardsdatascience.com/introduction-to-genetic-algorithms-including-example-code-e396e98d8bf3)
     - [Solving a unique Shortest Path problem using Ant Colony Optimisation](https://www.researchgate.net/publication/254455826_Solving_a_unique_Shortest_Path_problem_using_Ant_Colony_Optimisation)
+    - [Genetic algorithm with ant colony optimization](https://www.sciencedirect.com/science/article/abs/pii/S1568494606000822)
+    - [MAX-MIN Ant System](https://www.sciencedirect.com/science/article/abs/pii/S0167739X00000431?via%3Dihub)
+    - [MAX-MIN Ant System alt](https://www.researchgate.net/publication/277284831_MAX-MIN_ant_system)
 2. Articles
     - [A*-based Pathfinding in Modern Computer Games](https://www.researchgate.net/profile/Xiao-Cui-12/publication/267809499_A-based_Pathfinding_in_Modern_Computer_Games/links/54fd73740cf270426d125adc/A-based-Pathfinding-in-Modern-Computer-Games.pdf)
     - [A* Heuristicsc](http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html)

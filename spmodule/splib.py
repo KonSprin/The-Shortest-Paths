@@ -449,7 +449,7 @@ class Ant:
 def antss(g: ig.Graph, start: int, end: int, 
           number_of_generations=20, number_of_ants=100,
           ph_evap_coef=0.05, 
-          ph_influence=1, weight_influence=2):
+          ph_influence=1, weight_influence=1, visibility_influence=2):
   ''' 
   This function implements the Ant colony algorithm inspired by Ants
     Each generation some number of ants is released. 
@@ -464,7 +464,7 @@ def antss(g: ig.Graph, start: int, end: int,
     weight_influence - parameter to control the influence of weight in probabilty distribution 
   '''
 
-  ph_deposition = 10 * g.ecount() * ph_evap_coef / number_of_ants
+  ph_deposition = g.ecount() * ph_evap_coef
   
   width = g["width"]
   for v in g.vs():
@@ -487,7 +487,7 @@ def antss(g: ig.Graph, start: int, end: int,
   best_gen_path = []
   best_gen_path_weight = []
   for generation in range(number_of_generations):
-    all_paths, all_paths_weight = ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influence)
+    all_paths, all_paths_weight = ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influence, visibility_influence)
     
     
     # if len(all_paths) > 0:
@@ -532,7 +532,7 @@ def antss(g: ig.Graph, start: int, end: int,
   
   # return(final_path)
 
-def ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influence):
+def ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influence, visibility_influence):
   
   all_paths = []
   all_paths_weight = []
@@ -546,7 +546,7 @@ def ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influ
       if len(possible_ways) == 0:
         # log.debug(f"Ant {ant.id} got lost. Path: " + str(ant.visited))
         
-        ant.weight_sum = ant.weight_sum - g.vs[ant.visited[-1]]["height"]
+        # ant.weight_sum = ant.weight_sum - g.vs[ant.visited[-1]]["height"]
         ant.deadlocked.append(ant.visited.pop())
         ant.position = ant.visited[-1]
         
@@ -561,10 +561,11 @@ def ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influ
         position_distance = g.vs[ant.position]["distance"]
         for way in possible_ways:
           ph = g.es(g.get_eid(ant.position, way))["pheromone"][0] ** ph_influence
-          weight = (position_distance/g.vs[way]["distance"]) ** weight_influence
-          ph_sum += ph * weight
+          visibility = (position_distance/g.vs[way]["distance"]) ** visibility_influence
+          weight =  (1/g.es(g.get_eid(ant.position, way))["weight"][0]) ** weight_influence
+          ph_sum += ph * weight * visibility
 
-          way_distribiution_temp.append(ph * weight)
+          way_distribiution_temp.append(ph * weight * visibility)
         # way_distribiution = [wd - min(way_distribiution) + 1 for wd in way_distribiution] # normalize the shit out of this
         # way_distribiution = [(w - min(way_distribiution_temp)) for w in way_distribiution_temp]
         way_distribiution = [w/ph_sum for w in way_distribiution_temp]
@@ -575,18 +576,16 @@ def ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influ
         # ph_sum = sum([ g.es(g.get_eid(ant.position, w))["pheromone"][0] for w in possible_ways ])
         # way_distribiution = [ (g.es(g.get_eid(ant.position, w))["pheromone"][0] / g.es(g.get_eid(ant.position, w))["weight"][0] ) / ph_sum for w in possible_ways ]
       
-      ant.weight_sum = ant.weight_sum + g.vs[the_way]["height"]
+      # ant.weight_sum = ant.weight_sum + g.vs[the_way]["height"]
       ant.visited.append(the_way)
       ant.position = the_way
 
       # if ant reached goal, remove it from set and remember the path
       if the_way == end:
         log.debug(f"Ant {ant.id} found a way")
-        all_paths.append(remove_loops(g, ant.visited))
-        wsum = 0
-        for vis in all_paths[-1]:
-          wsum += g.vs[vis]["height"]
-        all_paths_weight.append(wsum)
+        path = remove_loops(g, ant.visited)
+        all_paths.append(path)
+        all_paths_weight.append(path_cost(g, path))
         ants.remove(ant)
         
   return all_paths,all_paths_weight
@@ -620,7 +619,7 @@ def minmax_pheromone_update(g, ph_evap_coef, ph_deposition, path, path_weight):
     next_hop = path[i+1]
     # g.es(x)["y"] returs one element list so You need to use [0] but in order to write to it You can't do that. It's stupid
     # g.es(g.get_eid(hop, next_hop))["pheromone"] = g.es(g.get_eid(hop, next_hop))["pheromone"][0] * (1 - ph_evap_coef) + ph_deposition/weight
-    g.es(g.get_eid(hop, next_hop))["ph_update"] = g.es(g.get_eid(hop, next_hop))["ph_update"][0] + ph_deposition/path_weight
+    g.es(g.get_eid(hop, next_hop))["ph_update"] = g.es(g.get_eid(hop, next_hop))["ph_update"][0] + ph_deposition/length
 
   for e in g.es():
     e["pheromone"] = e["pheromone"] * (1 - ph_evap_coef) + e["ph_update"]
@@ -645,3 +644,15 @@ def remove_loops(g, path):
       i += 1
       
   return tmp_path
+
+def path_cost(graph, path):
+  cost = 0
+  length = len(path)
+  
+  for i in range(length - 1):
+    hop = path[i]
+    next_hop = path[i+1]
+    cost += graph.es(graph.get_eid(hop, next_hop))["weight"][0]
+    
+  return cost
+    

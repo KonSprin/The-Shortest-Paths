@@ -108,7 +108,7 @@ def greedy_visualization(width, step, graph, img, start, end):
     frame = img
 
     for v in opened_list:
-      update_frame(width, step, v, frame, 'g')
+      update_frame(width, step, v, frame, 'b')
 
     for v in closed:
       update_frame(width, step, v, frame, 'b')
@@ -122,7 +122,7 @@ def greedy_visualization(width, step, graph, img, start, end):
   # When everything done, release the capture
   cv2.destroyAllWindows()
   
-def ant_visualization(width, step, graph, img, start, end, number_of_ants, ph_influence, weight_influence, ph_evap_coef, ph_deposition):
+def ant_visualization(width, step, graph, img, start, end, number_of_ants, ph_influence, weight_influence, ph_evap_coef, visibility_influence):
   for v in graph.vs():
     v["distance"] = diag_dist(v.index,end,width)
   graph.vs[end]["distance"] = 0.1
@@ -131,6 +131,8 @@ def ant_visualization(width, step, graph, img, start, end, number_of_ants, ph_in
     w, h = [x * step for x in vid2wh(v, width)]
     frame[h:h+step,w:w+step,1] += value
 
+  ph_deposition = graph.ecount() * ph_evap_coef
+  
   best_gen_path = []
   best_gen_path_weight = []
   num_reached = 0
@@ -138,7 +140,7 @@ def ant_visualization(width, step, graph, img, start, end, number_of_ants, ph_in
   # for h in range(0, height, step):
   #   for w in range(0, width, step):
   #     frame[h:h+step,w:w+step] = randint(0,255)
-    all_paths, all_paths_weight = ant_edge_selection(graph, start, end, number_of_ants, ph_influence, weight_influence)
+    all_paths, all_paths_weight = ant_edge_selection(graph, start, end, number_of_ants, ph_influence, weight_influence, visibility_influence)
     # graph = pheromone_update(graph, ph_evap_coef, ph_deposition, all_paths, all_paths_weight)
     
       
@@ -153,7 +155,7 @@ def ant_visualization(width, step, graph, img, start, end, number_of_ants, ph_in
     lprint(f"Ended generation with best paths cost: {best_gen_path_weight[-1]}")    
     ## Pheromone update after each generation
     # graph = pheromone_update(graph, ph_evap_coef, ph_deposition, all_paths, all_paths_weight)
-    graph = minmax_pheromone_update(graph, ph_evap_coef, ph_deposition*100, remove_loops(graph, best_gen_path[-1]), best_gen_path_weight[-1])
+    graph = minmax_pheromone_update(graph, ph_evap_coef, ph_deposition*100, best_gen_path[-1], best_gen_path_weight[-1])
 
   # for path in all_paths:
   #   for v in path:

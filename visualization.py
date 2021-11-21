@@ -58,11 +58,9 @@ graph, img = generate_weighted_graph(width, height, step, start, end, no_mountai
 # for v in path:
 #   update_frame(width, step, v ,img, 'w')
   
-# path = greedy_visualization(width, step, graph, img, start, end)
-# greedy_cost = sum([graph.vs(v)["height"][0] for v in path])
-# print(greedy_cost)
-# for e in graph.es():
-#     e["pheromone"] = 1q
+path = greedy_visualization(width, step, graph, img, start, end)
+greedy_cost = path_cost(graph, path)
+print(greedy_cost)
 
 # for v in path:
 #   update_frame(width, step, v ,img, 'w')
@@ -72,15 +70,16 @@ graph, img = generate_weighted_graph(width, height, step, start, end, no_mountai
 #   graph.es(graph.get_eid(pr,v))["pheromone"] = 900
 #   pr =  v
   
-number_of_ants = 10
-ph_influence = 1
-weight_influence = 3
+number_of_ants = 20
 ph_evap_coef=0.05
-ph_deposition=400
+
+ph_influence = 1
+weight_influence = 1
+visibility_influence=1
 
 ant_visualization(width, step, graph, img, start, end, 
-                  number_of_ants, ph_influence, weight_influence, 
-                  ph_evap_coef, ph_deposition)
+                  number_of_ants, ph_influence, weight_influence,
+                  ph_evap_coef, visibility_influence)
 
   
 cv2.imshow('frame', np.uint8(img))
