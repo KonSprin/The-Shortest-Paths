@@ -41,3 +41,4 @@ This is source code for my engineer degree diploma.
 5. Other
     - [Ant and Slime simulations](https://www.youtube.com/watch?v=X-iSQQgOd1A)
     - [Deadlock idea](https://www.frontiersin.org/articles/10.3389/fnbot.2019.00015/full)
+    - [Perlin Noise](https://medium.com/@yvanscher/playing-with-perlin-noise-generating-realistic-archipelagos-b59f004d8401)

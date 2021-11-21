@@ -118,7 +118,7 @@ if True:
   time_as = str(timer.time())
   lprint("A* finished")
   
-  path_ant = antss(graph,start,target,10,20)
+  path_ant = antss(graph,start,target,3,20)
   time_ant = str(timer.time())
   lprint("Ants finished")
   

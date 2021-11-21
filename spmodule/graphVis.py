@@ -131,36 +131,55 @@ def ant_visualization(width, step, graph, img, start, end, number_of_ants, ph_in
     w, h = [x * step for x in vid2wh(v, width)]
     frame[h:h+step,w:w+step,1] += value
 
+  best_gen_path = []
+  best_gen_path_weight = []
+  num_reached = 0
   while True:
   # for h in range(0, height, step):
   #   for w in range(0, width, step):
   #     frame[h:h+step,w:w+step] = randint(0,255)
     all_paths, all_paths_weight = ant_edge_selection(graph, start, end, number_of_ants, ph_influence, weight_influence)
-    graph = pheromone_update(graph, ph_evap_coef, ph_deposition, all_paths, all_paths_weight)
+    # graph = pheromone_update(graph, ph_evap_coef, ph_deposition, all_paths, all_paths_weight)
+    
+      
+    if len(all_paths) > 0:
+      best_gen_path_index = all_paths_weight.index(min(all_paths_weight))
+      best_gen_path.append(all_paths[best_gen_path_index])
+      best_gen_path_weight.append(all_paths_weight[best_gen_path_index])
+      log.debug("Best path this generation: " + str(best_gen_path_weight[-1]))
+
+      num_reached += len(all_paths)
+      
+    lprint(f"Ended generation with best paths cost: {best_gen_path_weight[-1]}")    
+    ## Pheromone update after each generation
+    # graph = pheromone_update(graph, ph_evap_coef, ph_deposition, all_paths, all_paths_weight)
+    graph = minmax_pheromone_update(graph, ph_evap_coef, ph_deposition*100, remove_loops(graph, best_gen_path[-1]), best_gen_path_weight[-1])
 
   # for path in all_paths:
   #   for v in path:
   #     update_frame(width, step, v, frame, 10)
 
   # tmp_frame = np.zeros((frame_height,frame_width,1), np.uint8)
-    frame = img
+    frame = img.copy()
 
-    # for e in graph.es():
-    #   s = e.source
-    #   t = e.target
-    #   update_frame(width, step, s, frame, np.uint8(e["pheromone"]))
-    #   update_frame(width, step, t, frame, np.uint8(e["pheromone"]))
-    # frmax = frame[:,:,1].max()
+    for e in graph.es():
+      s = e.source
+      t = e.target
+      update_frame(width, step, s, frame, np.uint8(e["pheromone"]))
+      update_frame(width, step, t, frame, np.uint8(e["pheromone"]))
+    frmax = frame[:,:,1].max()
     # print(frmax)
-    # frame[:,:,1] =  (frame[:,:,1]/frmax) * 254
+    frame[:,:,1] =  (frame[:,:,1]/frmax) * 254
     
     
-    for path in all_paths:
-      for v in path:
-        update_frame(width, step, v, frame, 10)
-      cv2.imshow('frame', np.uint8(frame))
-      if cv2.waitKey(1) == ord('q'):
-        break
+    # for path in all_paths:
+    #   for v in path:
+    #     update_frame(width, step, v, frame, 10)
+    #   frmax = frame[:,:,1].max()
+    #   frame[:,:,1] =  (frame[:,:,1]/frmax) * 254
+    #   cv2.imshow('frame', np.uint8(frame))
+    #   if cv2.waitKey(1) == ord('q'):
+    #     break
       
 
 

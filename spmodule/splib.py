@@ -1,7 +1,7 @@
 import logging as log
 import igraph as ig
 import numpy as np
-
+import noise
 from time import perf_counter as time
 from random import choices
 from math import floor 
@@ -38,6 +38,12 @@ def generate_graph(width, height):
   # Initial value of pheromone on each edge 
   for e in graph.es():
     e["pheromone"] = 1
+    dd = abs(e.target - e.source)
+    if (dd == 1) or (dd ==width):
+      e["weight"] = 1
+    else:
+      e["weight"] = 1.4142
+      
   
   for v in graph.vs():
     v["height"] = 1
@@ -51,7 +57,8 @@ def generate_weighted_graph(width, height, step, start, end, no_mountains, mount
   while path == [[]]:
     graph = generate_graph(width, height)
     img = np.zeros((frame_height,frame_width,3), np.uint32)
-    add_mountains(graph, img, sample(range(width*height), no_mountains), mountain_height, step)
+    # add_mountains(graph, img, sample(range(width*height), no_mountains), mountain_height, step)
+    add_perlin_mountains(graph,img,height, step, width/3)
 
     random_points(graph, img, step, wall_percent, start, end)
     try: 
@@ -240,12 +247,28 @@ def add_mountains(graph, img, mountain_list, height, step):
   smoothen_terrain(graph)
   
   for e in graph.es():
-    e["weight"] = (graph.vs(e.target)["height"][0] + graph.vs(e.source)["height"][0]) / 2
+    e["weight"] = e["weight"] * (graph.vs(e.target)["height"][0] + graph.vs(e.source)["height"][0]) / 2
   
   scalar = 100/height
   for v in graph.vs():
     w, h = vid2wh(v.index, graph["width"])
     img[h*step:h*step+step,w*step:w*step+step,2] = v["height"] * scalar
+
+def add_perlin_mountains(graph, img, height, step, scale = 30.0, octaves = 6, persistence = 0.5, lacunarity = 2.0):
+  width = graph["width"]
+  shape = (int(graph.vcount()/width), width)
+  
+  for i in range(shape[0]):
+    for j in range(shape[1]):
+      nois = noise.pnoise2(i/scale, j/scale, octaves=octaves, 
+                                  persistence=persistence, lacunarity=lacunarity, 
+                                  repeatx=1024, repeaty=1024, base=0)
+      img[i*step:i*step+step,j*step:j*step+step,2] = np.uint32((nois + 0.5) * height)
+      graph.vs(wh2vid(j,i,width))["height"] = (nois + 0.5) * height
+  
+  for e in graph.es():
+    e["weight"] = e["weight"] * (graph.vs(e.target)["height"][0] + graph.vs(e.source)["height"][0]) / 2
+ 
 
 def add_mountains_noimg(graph, mountain_list, height):  
   for mountain in mountain_list:
@@ -254,7 +277,7 @@ def add_mountains_noimg(graph, mountain_list, height):
   smoothen_terrain(graph)
   
   for e in graph.es():
-    e["weight"] = (graph.vs(e.target)["height"][0] + graph.vs(e.source)["height"][0]) / 2
+    e["weight"] = e["weight"] * (graph.vs(e.target)["height"][0] + graph.vs(e.source)["height"][0]) / 2
 
    
 class Timer:
@@ -463,59 +486,51 @@ def antss(g: ig.Graph, start: int, end: int,
   
   best_gen_path = []
   best_gen_path_weight = []
-  num_reached = 0
   for generation in range(number_of_generations):
     all_paths, all_paths_weight = ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influence)
     
-    lprint(f"Ended generation {generation} with {len(all_paths)} paths found way")
     
-    if len(all_paths) > 0:
-      best_gen_path_index = all_paths_weight.index(min(all_paths_weight))
-      best_gen_path.append(all_paths[best_gen_path_index])
-      best_gen_path_weight.append(all_paths_weight[best_gen_path_index])
-      log.debug("Best path this generation: " + str(best_gen_path_weight[-1]))
-
-      num_reached += len(all_paths)
+    # if len(all_paths) > 0:
+    best_gen_path_index = all_paths_weight.index(min(all_paths_weight))
+    best_gen_path.append(all_paths[best_gen_path_index])
+    best_gen_path_weight.append(all_paths_weight[best_gen_path_index])
+    log.debug("Best path this generation: " + str(best_gen_path_weight[-1]))
+      
+    lprint(f"Ended generation {generation} with best paths cost: {best_gen_path_weight[-1]}")    
     
     ## Pheromone update after each generation
-    g = pheromone_update(g, ph_evap_coef, ph_deposition, all_paths, all_paths_weight)
-    # g = minmax_pheromone_update(g, ph_evap_coef, ph_deposition*100, remove_loops(g, best_gen_path[-1]), best_gen_path_weight[-1])
+    # g = pheromone_update(g, ph_evap_coef, ph_deposition, all_paths, all_paths_weight)
+    g = minmax_pheromone_update(g, ph_evap_coef, ph_deposition*100, best_gen_path[-1], best_gen_path_weight[-1])
     
     # ph_influence=ph_influence*1.1
     # weight_influence=weight_influence*0.9
     
-    if len(all_paths) > 0:
-      best_gen_path_index = all_paths_weight.index(min(all_paths_weight))
-      best_gen_path.append(all_paths[best_gen_path_index])
-      best_gen_path_weight.append(all_paths_weight[best_gen_path_index])
-      log.debug("Best path this generation: " + str(best_gen_path_weight[-1]))
+    # if len(all_paths) > 0:
+    #   best_gen_path_index = all_paths_weight.index(min(all_paths_weight))
+    #   best_gen_path.append(all_paths[best_gen_path_index])
+    #   best_gen_path_weight.append(all_paths_weight[best_gen_path_index])
+    #   log.debug("Best path this generation: " + str(best_gen_path_weight[-1]))
 
-      num_reached += len(all_paths)
+    #   num_reached += len(all_paths)
     # print(all_ways)
-  if len(best_gen_path) > 0:
-    print(num_reached)
-    return best_gen_path[best_gen_path_weight.index(min(best_gen_path_weight))]
-  else:
-    print(num_reached)
-    return []
-  
-  print(num_reached)
-  final_path = [start]
-  visited = [start]
-  current = start
-  while final_path[-1] != end:
-    possible_ways = setsub(g.neighbors(current), visited)
+  return best_gen_path[best_gen_path_weight.index(min(best_gen_path_weight))]
 
-    if len(possible_ways) == 0:
-      log.error("Ants got lost! No way from start to end.")
-      return([])
+  # final_path = [start]
+  # visited = [start]
+  # current = start
+  # while final_path[-1] != end:
+  #   possible_ways = setsub(g.neighbors(current), visited)
 
-    way_distribiution = [g.es(g.get_eid(current, w))["pheromone"][0] for w in possible_ways]
-    visited.append(current)
-    current = possible_ways[way_distribiution.index(max(way_distribiution))]
-    final_path.append(current)
+  #   if len(possible_ways) == 0:
+  #     log.error("Ants got lost! No way from start to end.")
+  #     return([])
+
+  #   way_distribiution = [g.es(g.get_eid(current, w))["pheromone"][0] for w in possible_ways]
+  #   visited.append(current)
+  #   current = possible_ways[way_distribiution.index(max(way_distribiution))]
+  #   final_path.append(current)
   
-  return(final_path)
+  # return(final_path)
 
 def ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influence):
   
@@ -567,8 +582,11 @@ def ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influ
       # if ant reached goal, remove it from set and remember the path
       if the_way == end:
         log.debug(f"Ant {ant.id} found a way")
-        all_paths.append(ant.visited)
-        all_paths_weight.append(ant.weight_sum)
+        all_paths.append(remove_loops(g, ant.visited))
+        wsum = 0
+        for vis in all_paths[-1]:
+          wsum += g.vs[vis]["height"]
+        all_paths_weight.append(wsum)
         ants.remove(ant)
         
   return all_paths,all_paths_weight
@@ -616,13 +634,13 @@ def remove_loops(g, path):
     node = path[i]
     tmp_path.append(node)
     
-    possible_shorts = []
+    possible_shortcuts = []
     for neighbor in g.neighbors(node):
       if neighbor in path[i+2:]:
-        possible_shorts.append(path.index(neighbor))
+        possible_shortcuts.append(path.index(neighbor))
         
-    if len(possible_shorts) > 0:
-      i = max(possible_shorts)
+    if len(possible_shortcuts) > 0:
+      i = max(possible_shortcuts)
     else: 
       i += 1
       
