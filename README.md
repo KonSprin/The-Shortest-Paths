@@ -5,16 +5,20 @@ This is source code for my engineer degree diploma.
 ## Representation
 
 Graphs represent Terrain on which we try to find shortest path from point A to B. On the therrrain there are walls through which we can't traverse and mountains that we are trying to avoid. Mountains are generated via Perlin noise function which quite nicely produces real world looking results  
+![](visualizations/mountains_and_walls.png)
 
 ## Algorithms
 
 I've implemented a couple of algorithms:
  - Greedy
+    ![](visualizations/greedy.gif)
  - Dijkstra
- - Bellman-Ford
+    ![](visualizations/dijkstra.gif)
  - A*
+    ![](visualizations/a_star.gif)
  - Shortes Path Ant Colony Optimization (SPACO)
-
+    ![](visualizations/ants.gif)
+ - Bellman-Ford
 
 ## Resources
 1. Science
