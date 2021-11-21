@@ -2,18 +2,19 @@
 
 This is source code for my engineer degree diploma. 
 
+## Representation
 
-## Roadmap
- 1. Generating graphs that would represent real data
-    - Representation of 2D map
- 2. Getting some shortest path algorithms
-    - Dijkstra
-    - Bellman-Ford
-    - Ant Colony
-    - A* 
- 3. Visualizing graphs along with every path 
- 4. Create ML that would find those paths
-    - Might change to genetic algorithm to find best weights for ant colony algorithm
+Graphs represent Terrain on which we try to find shortest path from point A to B. On the therrrain there are walls through which we can't traverse and mountains that we are trying to avoid. Mountains are generated via Perlin noise function which quite nicely produces real world looking results  
+
+## Algorithms
+
+I've implemented a couple of algorithms:
+ - Greedy
+ - Dijkstra
+ - Bellman-Ford
+ - A*
+ - Shortes Path Ant Colony Optimization (SPACO)
+
 
 ## Resources
 1. Science
