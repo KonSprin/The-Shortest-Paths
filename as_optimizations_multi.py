@@ -20,6 +20,18 @@ def influence_test(graph, starts, ends, width, mean_costs, ph_influence, weight_
     mean_costs[name] = cost_sum/len(starts)
     print(cost_sum/len(starts))
     
+def count_test(graph, starts, ends, width, mean_costs, ant_count):
+    cost_sum = 0
+    for start, end in zip(starts,ends):
+      path = antss(graph, start, end, 8, ant_count, 0.04, 1, 2, 1)
+      # path = graph.get_shortest_paths(start,end)[0]
+      # sleep(randint(0,2))
+      cost_sum += path_cost(graph, path)
+          
+    name = "count:" + str(ant_count) + ":wdth:" + str(int(width))
+    mean_costs[name] = cost_sum/len(starts)
+    print(cost_sum/len(starts))
+    
 if __name__ == '__main__':
 
   log.basicConfig(level=log.INFO,
@@ -39,8 +51,9 @@ if __name__ == '__main__':
               "graphs/optimization60x40.graphml": [2399, 2301, 59, 2399, 2301, 0], 
               "graphs/optimization30x30.graphml": [899, 871, 29, 899, 871, 0]}
 
-  test_name = "influences"
-
+  # test_name = "influences"
+  test_name = "ant_count"
+  
   manager = multiprocessing.Manager()
   mean_costs = manager.dict()
   
@@ -63,22 +76,31 @@ if __name__ == '__main__':
         
         mean_costs[ph_evap_coef] = cost_sum
         print(cost_sum)
-    
     elif test_name == "influences":
+      ant_count = 20
+      ph_evap_coef = 0.04
       for ph_influence in range(1,5):
         for weight_influence in range(1,5):
           for visibility_influence in range(1,5):
+            try:
+              pool.apply_async(influence_test, (graph, starts, ends, width, mean_costs, ant_count, ph_evap_coef, ph_influence, weight_influence, visibility_influence))
+            except ValueError:
+              pass
             # t = multiprocessing.Process(target=influence_test, args=(graph, starts, ends, width, mean_costs, ph_influence, weight_influence, visibility_influence))
             # t.start()
             # threads.append(t)
-            
-            # threads.append((graph, starts, ends, width, mean_costs, ph_influence, weight_influence, visibility_influence))
-            try:
-              pool.apply_async(influence_test, (graph, starts, ends, width, mean_costs, ph_influence, weight_influence, visibility_influence))
-            except ValueError:
-              pass
+                    
             # influence_test(graph, starts, ends, width, mean_costs, ph_influence, weight_influence, visibility_influence)
-            
+    elif test_name == "ant_count":
+      ph_evap_coef = 0.04, 
+      ph_influence = 1
+      weight_influence = 2
+      visibility_influence = 2
+      for ant_count in range(3,100):
+        try:
+          pool.apply_async(count_test, (graph, starts, ends, width, mean_costs, ant_count))
+        except ValueError:
+          pass
   pool.close()
   pool.join()
   # for th in threads:
