@@ -4,7 +4,10 @@ This is source code for my engineer degree diploma.
 
 ## Representation
 
-Graphs represent Terrain on which we try to find shortest path from point A to B. On the therrrain there are walls through which we can't traverse and mountains that we are trying to avoid. Mountains are generated via Perlin noise function which quite nicely produces real world looking results  
+Graphs represent Terrain on which we try to find shortest path from point A to B. On the therrrain there are mountains that we are trying to avoid. Mountains are generated via Perlin noise function which quite nicely produces real world looking results:
+![](visualizations/mountains.png)
+
+There are also some walls on the map generated randomly. They represent obstacles that we can't pass and have to go around. On the image bellow mountain height is shown as red and the walls are in black
 ![](visualizations/mountains_and_walls.png)
 
 ## Algorithms
