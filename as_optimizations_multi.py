@@ -1,7 +1,4 @@
-# %%
-
 import multiprocessing
-from multiprocessing import managers
 import igraph as ig 
 import logging as log
 from spmodule.splib import *
@@ -29,8 +26,6 @@ if __name__ == '__main__':
                   format='%(levelname)s: %(module)s %(asctime)s %(message)s',
                   filename='sp.log', filemode='w')
 
-  # multiprocessing.set_start_method("spawn")
-
   LOG = log.getLogger()
 
   threads = []
@@ -45,20 +40,6 @@ if __name__ == '__main__':
               "graphs/optimization30x30.graphml": [899, 871, 29, 899, 871, 0]}
 
   test_name = "influences"
-
-  # class myThread (threading.Thread):
-  #    def __init__(self, graph, starts, ends, width, mean_costs, ph_influence, weight_influence, visibility_influence):
-  #       threading.Thread.__init__(self)
-  #       self.graph = graph
-  #       self.starts = starts
-  #       self.ends = ends
-  #       self.width = width
-  #       self.mean_costs = mean_costs
-  #       self.ph_influence = ph_influence
-  #       self.weight_influence = weight_influence
-  #       self.visibility_influence = visibility_influence
-  #    def run(self):
-  #       influence_test(graph, starts, ends, width, mean_costs, ph_influence, weight_influence, visibility_influence)
 
   manager = multiprocessing.Manager()
   mean_costs = manager.dict()

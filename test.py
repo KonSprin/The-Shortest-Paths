@@ -62,17 +62,17 @@ elif True:
   start = wh2vid(5,5, width)
   end =  wh2vid(95,45, width)
 
-  graph = ig.load("graphs/optimization.graphml")
+  graph = ig.load("graphs/optimization100x50.graphml")
   
-  with open("graphs/optimization.npy", 'rb') as f:
+  with open("graphs/optimization100x50.npy", 'rb') as f:
     img = np.load(f)
 else:
-  width = 100
-  height = 50
-  step = 10
+  width = 30
+  height = 30
+  step = 20
 
-  start = wh2vid(5,5, width)
-  end =  wh2vid(95,45, width)
+  start = wh2vid(0,0, width)
+  end =  wh2vid(29,29, width)
 
   no_mountains = 6
   mountain_height = 10
@@ -112,7 +112,7 @@ if True:
   time_as = str(timer.time())
   lprint("A* finished")
   
-  path_ant = antss(graph,start,target,3,20)
+  path_ant = antss(graph,start,target,10,20)
   time_ant = str(timer.time())
   lprint("Ants finished")
   
