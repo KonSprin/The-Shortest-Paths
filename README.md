@@ -35,6 +35,7 @@ I've implemented a couple of algorithms:
     - [Genetic algorithm with ant colony optimization](https://www.sciencedirect.com/science/article/abs/pii/S1568494606000822)
     - [MAX-MIN Ant System](https://www.sciencedirect.com/science/article/abs/pii/S0167739X00000431?via%3Dihub)
     - [MAX-MIN Ant System alt](https://www.researchgate.net/publication/277284831_MAX-MIN_ant_system)
+    - [Perlin Noise Pixel Shaders](https://dl.acm.org/doi/abs/10.1145/383507.383531)
 2. Articles
     - [A*-based Pathfinding in Modern Computer Games](https://www.researchgate.net/profile/Xiao-Cui-12/publication/267809499_A-based_Pathfinding_in_Modern_Computer_Games/links/54fd73740cf270426d125adc/A-based-Pathfinding-in-Modern-Computer-Games.pdf)
     - [A* Heuristicsc](http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html)
