@@ -327,8 +327,8 @@ def bellfo(g, start, end):
   return path
 
 
-def dijkstra(g, start, end):
-  vn = g.vcount()
+def dijkstra(graph, start, end):
+  vn = graph.vcount()
   dist = [float("inf")] * vn
   previus = [[]] * vn
 
@@ -348,9 +348,9 @@ def dijkstra(g, start, end):
     
     if u == end: return reconstruct_path(start, end, previus)
     
-    for v in g.neighbors(u):
-      eid = g.get_eid(u, v)
-      alt = dist[u] + g.es(eid)["weight"][0]
+    for v in graph.neighbors(u):
+      eid = graph.get_eid(u, v)
+      alt = dist[u] + graph.es(eid)["weight"][0]
       if alt < dist[v]:
         dist[v] = alt
         previus[v] = u
