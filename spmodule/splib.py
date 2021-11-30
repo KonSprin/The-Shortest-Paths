@@ -50,7 +50,7 @@ def generate_graph(width, height):
 
   return graph
 
-def generate_weighted_graph(width, height, step, start, end, no_mountains, mountain_height, wall_percent):
+def generate_weighted_graph(width, height, step, start, end, mountain_height, wall_percent):
   frame_width = width * step
   frame_height = height * step
   path = [[]]
@@ -70,11 +70,12 @@ def generate_weighted_graph(width, height, step, start, end, no_mountains, mount
   update_frame(width, step, start, img, 'b')
   return graph,img
 
-def generate_weighted_graph_noimg(width, height, start, end, no_mountains, mountain_height, wall_percent):
+def generate_weighted_graph_noimg(width, height, start, end, mountain_height, wall_percent):
   path = [[]]
   while path == [[]]:
     graph = generate_graph(width, height)
-    add_mountains_noimg(graph, sample(range(width*height), no_mountains), mountain_height)
+    
+    add_perlin_mountains_noimg(graph, mountain_height)
 
     random_points_noimg(graph, wall_percent, start, end)
     try: 
@@ -275,6 +276,18 @@ def add_perlin_mountains(graph, img, height, step, scale = 30.0, octaves = 6, pe
   for e in graph.es():
     e["weight"] = e["weight"] * (graph.vs(e.target)["height"][0] + graph.vs(e.source)["height"][0]) / 2
  
+def add_perlin_mountains_noimg(graph, height, scale = 30.0, octaves = 6, persistence = 0.5, lacunarity = 2.0):
+  width = graph["width"]
+  shape = (int(graph.vcount()/width), width)
+  for i in range(shape[0]):
+    for j in range(shape[1]):
+      nois = noise.pnoise2(i/scale, j/scale, octaves=octaves, 
+                                  persistence=persistence, lacunarity=lacunarity, 
+                                  repeatx=1024, repeaty=1024, base=0)
+      graph.vs(wh2vid(j,i,width))["height"] = (nois + 0.5) * height
+  
+  for e in graph.es():
+    e["weight"] = e["weight"] * (graph.vs(e.target)["height"][0] + graph.vs(e.source)["height"][0]) / 2
 
 def add_mountains_noimg(graph, mountain_list, height):  
   for mountain in mountain_list:
@@ -456,8 +469,8 @@ class Ant:
     self.deadlocked = []
 
 def antss(g: ig.Graph, start: int, end: int, 
-          number_of_generations=20, number_of_ants=100,
-          ph_evap_coef=0.05, 
+          number_of_generations=10, number_of_ants=20,
+          ph_evap_coef=0.04, 
           ph_influence=1, weight_influence=1, visibility_influence=1):
   ''' 
   This function implements the Ant colony algorithm inspired by Ants
@@ -503,13 +516,13 @@ def antss(g: ig.Graph, start: int, end: int,
     best_gen_path_index = all_paths_weight.index(min(all_paths_weight))
     best_gen_path.append(all_paths[best_gen_path_index])
     best_gen_path_weight.append(all_paths_weight[best_gen_path_index])
-    log.debug("Best path this generation: " + str(best_gen_path_weight[-1]))
+    log.debug(f"Ended generation {generation} with best paths cost: {best_gen_path_weight[-1]}")
       
-    lprint(f"Ended generation {generation} with best paths cost: {best_gen_path_weight[-1]}")    
+    # lprint(f"Ended generation {generation} with best paths cost: {best_gen_path_weight[-1]}")    
     
     ## Pheromone update after each generation
     # g = pheromone_update(g, ph_evap_coef, ph_deposition, all_paths, all_paths_weight)
-    g = minmax_pheromone_update(g, ph_evap_coef, ph_deposition*100, best_gen_path[-1], best_gen_path_weight[-1])
+    g = minmax_pheromone_update(g, ph_evap_coef, ph_deposition, best_gen_path[-1], best_gen_path_weight[-1])
     
     # ph_influence=ph_influence*1.1
     # weight_influence=weight_influence*0.9
@@ -593,6 +606,7 @@ def ant_edge_selection(g, start, end, number_of_ants, ph_influence, weight_influ
       if the_way == end:
         log.debug(f"Ant {ant.id} found a way")
         path = remove_loops(g, ant.visited)
+        # path = ant.visited
         all_paths.append(path)
         all_paths_weight.append(path_cost(g, path))
         ants.remove(ant)
