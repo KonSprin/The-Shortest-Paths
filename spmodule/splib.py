@@ -75,7 +75,7 @@ def generate_weighted_graph_noimg(width, height, start, end, mountain_height, wa
   while path == [[]]:
     graph = generate_graph(width, height)
     
-    add_perlin_mountains_noimg(graph, mountain_height)
+    add_perlin_mountains_noimg(graph, mountain_height, width/3)
 
     random_points_noimg(graph, wall_percent, start, end)
     try: 
@@ -265,13 +265,16 @@ def add_perlin_mountains(graph, img, height, step, scale = 30.0, octaves = 6, pe
   width = graph["width"]
   shape = (int(graph.vcount()/width), width)
   img[:,:,2] = 255
+  base = int(randint(1,300))
   for i in range(shape[0]):
     for j in range(shape[1]):
-      nois = noise.pnoise2(i/scale, j/scale, octaves=octaves, 
-                                  persistence=persistence, lacunarity=lacunarity, 
-                                  repeatx=1024, repeaty=1024, base=0)
-      img[i*step:i*step+step,j*step:j*step+step,0:2] = 255 - np.uint32((nois + 0.5) * 255)
-      graph.vs(wh2vid(j,i,width))["height"] = (nois + 0.5) * height
+      nois = 0
+      for l in [1, 2, 4, 8]:
+        nois += noise.pnoise2(i/(scale/l), j/(scale/l), octaves=octaves, 
+                             persistence=persistence, lacunarity=lacunarity, 
+                             repeatx=1024, repeaty=1024, base=base)/l
+      img[i*step:i*step+step,j*step:j*step+step,0:2] = 255 - np.uint32((np.tanh(nois)/2 + 0.5) * 255)
+      graph.vs(wh2vid(j,i,width))["height"] = (np.tanh(nois)/2 + 0.5) * height
   
   for e in graph.es():
     e["weight"] = e["weight"] * (graph.vs(e.target)["height"][0] + graph.vs(e.source)["height"][0]) / 2
@@ -279,12 +282,15 @@ def add_perlin_mountains(graph, img, height, step, scale = 30.0, octaves = 6, pe
 def add_perlin_mountains_noimg(graph, height, scale = 30.0, octaves = 6, persistence = 0.5, lacunarity = 2.0):
   width = graph["width"]
   shape = (int(graph.vcount()/width), width)
+  base = randint(0,300)
   for i in range(shape[0]):
     for j in range(shape[1]):
-      nois = noise.pnoise2(i/scale, j/scale, octaves=octaves, 
-                                  persistence=persistence, lacunarity=lacunarity, 
-                                  repeatx=1024, repeaty=1024, base=0)
-      graph.vs(wh2vid(j,i,width))["height"] = (nois + 0.5) * height
+      nois = 0
+      for l in [1, 2, 4, 8]:
+        nois += noise.pnoise2(i/(scale/l), j/(scale/l), octaves=octaves, 
+                             persistence=persistence, lacunarity=lacunarity, 
+                             repeatx=1024, repeaty=1024, base=base)/l
+      graph.vs(wh2vid(j,i,width))["height"] = (np.tanh(nois)/2 + 0.5) * height
   
   for e in graph.es():
     e["weight"] = e["weight"] * (graph.vs(e.target)["height"][0] + graph.vs(e.source)["height"][0]) / 2

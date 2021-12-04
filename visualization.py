@@ -24,7 +24,7 @@ if True:
   no_mountains = 6
   mountain_height = 15
   wall_percent = 15
-  graph, img = generate_weighted_graph(width, height, step, start, end, no_mountains, mountain_height, wall_percent)
+  graph, img = generate_weighted_graph(width, height, step, start, end, mountain_height, wall_percent)
 
 else: 
   width = 30
@@ -87,17 +87,17 @@ else:
 # for v in path:
 #   update_frame(width, step, v ,img, 'w')
 
-print(path_cost(graph, Astar(graph,start,end)))
+# print(path_cost(graph, Astar(graph,start,end)))
 
-number_of_ants = 20
-ph_evap_coef=0.05
-ph_influence = 1
-weight_influence = 8
-visibility_influence  = 1
+# number_of_ants = 20
+# ph_evap_coef=0.05
+# ph_influence = 1
+# weight_influence = 8
+# visibility_influence  = 1
 
-image_list = ant_visualization(width, step, graph, img, start, end, 
-                  number_of_ants, ph_influence, weight_influence,
-                  ph_evap_coef, visibility_influence)
+# image_list = ant_visualization(width, step, graph, img, start, end, 
+#                   number_of_ants, ph_influence, weight_influence,
+#                   ph_evap_coef, visibility_influence)
 
 # print(len(image_list))
 # imageio.mimsave('graphs/a_star2.gif', image_list, fps=30)
