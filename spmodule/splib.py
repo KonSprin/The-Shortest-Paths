@@ -123,7 +123,13 @@ def diag_dist(start, goal, width):
   if dx > dy:
     return 14*dy + 10*(dx-dy)
   return 14*dx + 10*(dy-dx)
-  # return ((dx + dy) - 0.585786* min(dx, dy)) * 10
+
+def octile_dist(start, goal, width):
+  start_x, start_y = vid2wh(start, width)
+  goal_x, goal_y = vid2wh(goal, width)
+  dx = abs(start_x - goal_x)
+  dy = abs(start_y - goal_y)
+  return ((dx + dy) - 0.585786* min(dx, dy))
   # (D2 - 2 * D) * min(dx, dy) - There are min(dx, dy) diagonal steps, and each one costs D2 but saves you 2x D non-diagonal steps.
 
 def eucl_dist(start, goal, width):
@@ -434,7 +440,56 @@ def Astar(g, start, end):
         if v not in opened:
           opened.append(v)
 
+def Astar_optimal(g, start, end):
+  """[summary]
 
+  Args:
+      g ([type]): [description]
+      start ([type]): [description]
+      end ([type]): [description]
+
+  Returns:
+      [type]: [description]
+  """
+  vn = g.vcount()
+  p = 2/vn
+  
+  previus = [[]] * vn
+
+  opened = [start]
+  closed = []
+  
+  dist = [float("inf")] * vn
+  dist[start] = 0
+
+  fscore = [float("inf")] * vn
+  fscore[start] = octile_dist(start, end, g["width"]) * (1+p)
+
+  while len(opened) > 0:
+    # tmp_dist = fscore.copy()
+    # for q in closed:
+    #   tmp_dist[q] = float('inf')
+
+    tmp_dist = [float("inf")] * vn
+    for q in opened:
+      tmp_dist[q] = fscore[q]
+    u = tmp_dist.index(min(tmp_dist))
+    
+    if u == end:
+      return reconstruct_path(start, u, previus)
+
+    closed.append(u)
+    opened.remove(u)
+    for v in g.neighbors(u):
+      eid = g.get_eid(u, v)
+      alt = dist[u] + g.es(eid)["weight"][0]
+      if alt < dist[v]:
+        dist[v] = alt
+        fscore[v] = alt + octile_dist(v, end, g["width"]) * (1+p)
+        previus[v] = u
+        if v not in opened:
+          opened.append(v)
+          
 def bestfirst(g, start, end):
   vn = g.vcount()
   previus = [[]] * vn
@@ -475,9 +530,9 @@ class Ant:
     self.deadlocked = []
 
 def antss(g: ig.Graph, start: int, end: int, 
-          number_of_generations=10, number_of_ants=20,
-          ph_evap_coef=0.04, 
-          ph_influence=1, weight_influence=1, visibility_influence=1):
+          number_of_generations=50, number_of_ants=20,
+          ph_evap_coef=0.15, 
+          ph_influence=1, weight_influence=2, visibility_influence=1):
   ''' 
   This function implements the Ant colony algorithm inspired by Ants
     Each generation some number of ants is released. 
