@@ -15,10 +15,13 @@ def gg(size, width, height, mountain_height, wall_percent, i):
   graph["end"] = target
   graph["mountain_height"] = mountain_height
   graph["wall_percent"] = wall_percent
-
+  
+  time = timer.time()
+  graph["gen_time"] = time
+  
   ig.save(graph, gname)
 
-  print(f"generated {i} in {timer.time()}")
+  print(f"generated {i} in {time}")
 
 if __name__ == '__main__':
   size = 300
@@ -29,11 +32,11 @@ if __name__ == '__main__':
   mountain_height = 10
   wall_percent = 5
 
-  N = 1000
+  N = 100
   
   pool = multiprocessing.Pool(8)
   
-  for i in range(500):
+  for i in range(N):
     pool.apply_async(gg, (size, width, height, mountain_height, wall_percent, i))
     
     
