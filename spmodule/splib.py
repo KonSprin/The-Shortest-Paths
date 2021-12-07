@@ -124,12 +124,15 @@ def diag_dist(start, goal, width):
     return 14*dy + 10*(dx-dy)
   return 14*dx + 10*(dy-dx)
 
+def zero(start, goal, width):
+    return 0
+
 def octile_dist(start, goal, width):
   start_x, start_y = vid2wh(start, width)
   goal_x, goal_y = vid2wh(goal, width)
   dx = abs(start_x - goal_x)
   dy = abs(start_y - goal_y)
-  return ((dx + dy) - 0.585786* min(dx, dy))
+  return ((dx + dy) - 0.585786* min(dx, dy)) * 5
   # (D2 - 2 * D) * min(dx, dy) - There are min(dx, dy) diagonal steps, and each one costs D2 but saves you 2x D non-diagonal steps.
 
 def eucl_dist(start, goal, width):
@@ -440,7 +443,7 @@ def Astar(g, start, end):
         if v not in opened:
           opened.append(v)
 
-def Astar_optimal(g, start, end):
+def Astar_heuristic(g, start, end, heuristic):
   """[summary]
 
   Args:
@@ -463,7 +466,7 @@ def Astar_optimal(g, start, end):
   dist[start] = 0
 
   fscore = [float("inf")] * vn
-  fscore[start] = octile_dist(start, end, g["width"]) * (1+p)
+  fscore[start] = heuristic(start, end, g["width"]) * (1+p)
 
   while len(opened) > 0:
     # tmp_dist = fscore.copy()
@@ -485,7 +488,7 @@ def Astar_optimal(g, start, end):
       alt = dist[u] + g.es(eid)["weight"][0]
       if alt < dist[v]:
         dist[v] = alt
-        fscore[v] = alt + octile_dist(v, end, g["width"]) * (1+p)
+        fscore[v] = alt + heuristic(v, end, g["width"]) * (1+p)
         previus[v] = u
         if v not in opened:
           opened.append(v)
@@ -530,7 +533,7 @@ class Ant:
     self.deadlocked = []
 
 def antss(g: ig.Graph, start: int, end: int, 
-          number_of_generations=50, number_of_ants=20,
+          number_of_generations=5, number_of_ants=20,
           ph_evap_coef=0.15, 
           ph_influence=1, weight_influence=2, visibility_influence=1):
   ''' 
