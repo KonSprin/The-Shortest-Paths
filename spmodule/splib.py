@@ -121,6 +121,24 @@ def diag_dist(start, goal, width):
   dx = abs(start_x - goal_x)
   dy = abs(start_y - goal_y)
   if dx > dy:
+    return 0.4*dy + dx
+  return 0.4*dx + dy
+
+def diag_dist2(start, goal, width):
+  start_x, start_y = vid2wh(start, width)
+  goal_x, goal_y = vid2wh(goal, width)
+  dx = abs(start_x - goal_x)
+  dy = abs(start_y - goal_y)
+  if dx > dy:
+    return dy + 2*dx
+  return dx + 2*dy
+
+def diag_dist10(start, goal, width):
+  start_x, start_y = vid2wh(start, width)
+  goal_x, goal_y = vid2wh(goal, width)
+  dx = abs(start_x - goal_x)
+  dy = abs(start_y - goal_y)
+  if dx > dy:
     return 14*dy + 10*(dx-dy)
   return 14*dx + 10*(dy-dx)
 
@@ -534,7 +552,7 @@ class Ant:
 
 def antss(g: ig.Graph, start: int, end: int, 
           number_of_generations=5, number_of_ants=20,
-          ph_evap_coef=0.15, 
+          ph_evap_coef=0.20, 
           ph_influence=1, weight_influence=2, visibility_influence=1):
   ''' 
   This function implements the Ant colony algorithm inspired by Ants

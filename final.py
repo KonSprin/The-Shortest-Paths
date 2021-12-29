@@ -4,9 +4,12 @@ from spmodule.splib import *
 from json import dump
 from datetime import datetime
 
-def test(graph, start, end, costs, times, gnum, algorithm, heuristic):
+def test(graph, start, end, costs, times, gnum, algorithm, heuristic = None):
   timer = Timer()
-  path = algorithm(graph, start, end, heuristic)
+  if heuristic is not None:
+    path = algorithm(graph, start, end, heuristic)
+  else:
+    path = algorithm(graph, start, end)
   atime = timer.time()
   
   cost = path_cost(graph, path)
@@ -25,15 +28,15 @@ if __name__ == '__main__':
   
   size = 100
   offset = 00
-  N = 500
-  
+  N = 100
+
   costs = manager.dict()
   times = manager.dict()
   all_dict = {0: {"cost": 0, "time": 0}}
   
-  algorithm = Astar_heuristic
+  algorithm = Astar
   
-  heuristic = zero
+  heuristic = diag_dist2
   
   params = {'size': size, "Graphs": N, "offset": offset, 
             "algorithm": algorithm.__name__, "heuristic": heuristic.__name__}
@@ -43,7 +46,8 @@ if __name__ == '__main__':
     start = int(graph["start"])
     end = int(graph["end"])
 
-    pool.apply_async(test, (graph, start, end, costs, times, gnum, algorithm, heuristic))
+    # pool.apply_async(test, (graph, start, end, costs, times, gnum, algorithm, heuristic))
+    pool.apply_async(test, (graph, start, end, costs, times, gnum, algorithm))
     
   pool.close()
   pool.join()
@@ -64,6 +68,6 @@ if __name__ == '__main__':
            "meantime" : mean_time, "mean_cost": mean_cost,
            "all_dict": all_dict}
   
-  fname = "dumps/final/" + algorithm.__name__ + "-" + str(datetime.now().strftime('%d-%m--%H-%M-%S')) + ".json"
+  fname = "dumps/final/" + algorithm.__name__ + "-" + str(size) + "--" + str(datetime.now().strftime('%d-%m--%H-%M-%S')) + ".json"
   with open(fname, 'w') as f:
     dump(dict(jdict), f, indent=2)
