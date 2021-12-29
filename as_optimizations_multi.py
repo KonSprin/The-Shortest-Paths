@@ -19,40 +19,40 @@ def influence_test(graph, starts, ends, width, mean_costs, ph_influence, weight_
     mean_costs[name] = cost_sum/len(starts)
     print(cost_sum/len(starts))
     
-def count_test(graph, start, end, ant_count, costs, times, gnum):
+def count_test(graph, start, end, ant_count, costs, times, graph_num, gen_num = 5):
   timer = Timer()
-  path = antss(graph, start, end, number_of_generations = 5, 
+  path = antss(graph, start, end, number_of_generations = gen_num, 
               number_of_ants = ant_count, ph_evap_coef = 0.04,
               ph_influence= 1, weight_influence= 2, visibility_influence= 1)
   atime = timer.time()
         
   cost = path_cost(graph, path)
-  costs[f"{gnum}:{ant_count}"] = cost
-  times[f"{gnum}:{ant_count}"] = atime
-  print(f"Num: {gnum}, ants: {ant_count}, cost: {cost}, time: {atime}")
+  costs[f"{graph_num}:{ant_count}"] = cost
+  times[f"{graph_num}:{ant_count}"] = atime
+  print(f"Num: {graph_num}, ants: {ant_count}, cost: {cost}, time: {atime}")
     
     
-def generation_test(graph, start, end, generations, costs, times, gnum):
+def generation_test(graph, start, end, generations, costs, times, graph_num):
   timer = Timer()
   path = antss(graph, start, end, number_of_generations = generations, 
                 number_of_ants = 20, ph_evap_coef = 0.04,
                 ph_influence= 1, weight_influence= 2, visibility_influence= 1)
   atime = timer.time()
   cost = path_cost(graph, path)
-  costs[f"{gnum}:{generations}"] = cost
-  times[f"{gnum}:{generations}"] = atime
-  print(f"Num: {gnum}, generations: {generations}, cost: {cost}, time: {atime}")
+  costs[f"{graph_num}:{generations}"] = cost
+  times[f"{graph_num}:{generations}"] = atime
+  print(f"Num: {graph_num}, generations: {generations}, cost: {cost}, time: {atime}")
     
-def evap_test(graph, start, end, evap_coef, costs, times, gnum):
+def evap_test(graph, start, end, evap_coef, costs, times, graph_num):
   timer = Timer()
   path = antss(graph, start, end, number_of_generations = 5, 
-                number_of_ants = 20, ph_evap_coef = evap_coef,
+                number_of_ants = 20, ph_evap_coef = evap_coef/100,
                 ph_influence= 1, weight_influence= 2, visibility_influence= 1)
   atime = timer.time()
   cost = path_cost(graph, path)
-  costs[f"{gnum}:{evap_coef}"] = cost
-  times[f"{gnum}:{evap_coef}"] = atime
-  print(f"Num: {gnum}, evap_coef: {evap_coef}, cost: {cost}, time: {atime}")
+  costs[f"{graph_num}:{evap_coef}"] = cost
+  times[f"{graph_num}:{evap_coef}"] = atime
+  print(f"Num: {graph_num}, evap_coef: {evap_coef/100}, cost: {cost}, time: {atime}")
   
 if __name__ == '__main__':
 
@@ -84,16 +84,19 @@ if __name__ == '__main__':
                   
   #         # influence_test(graph, starts, ends, width, mean_costs, ph_influence, weight_influence, visibility_influence)
   
-  size = 50
+  size = 100
   offset = 00
   N = 500
-  test_range = arange(0.05,0.15,0.01)
+  test_range = range(25,35,1)
+  gen_num = 3
   
   costs = manager.dict()
   times = manager.dict()
   sum_dict = {0: {"cost": 0, "time": 0}}
   allgen_dict = {0: {0: {"cost": 0, "time": 0}}}
-  params = {'size': size, "Graphs": N, "offset": offset, "range": [test_range[0],test_range[-1]]}
+  params = {'size': size, "Graphs": N, "offset": offset, 
+            "range": [test_range[0],test_range[-1], test_range[1]-test_range[0]],
+            "num_of_generations": gen_num}
 
   for ngen in test_range:
     sum_dict[ngen] = {"cost": 0, "time": 0}
@@ -103,20 +106,20 @@ if __name__ == '__main__':
   
   test_name = "ph_evap"
   
-  for gnum in range(offset, offset + N):
-    graph = ig.load(f"graphs/simulations/{size}x{size}/graph_{gnum}.graphml")
+  for graph_num in range(offset, offset + N):
+    graph = ig.load(f"graphs/simulations/{size}x{size}/graph_{graph_num}.graphml")
     start = int(graph["start"])
     end = int(graph["end"])
     
     if test_name == "generations":
       for ngen in test_range:
-        pool.apply_async(generation_test, (graph, start, end, ngen, costs, times, gnum))
+        pool.apply_async(generation_test, (graph, start, end, ngen, costs, times, graph_num))
     elif  test_name == "ant_count":
       for ant_count in test_range:
-        pool.apply_async(count_test, (graph, start, end, ant_count, costs, times, gnum))
+        pool.apply_async(count_test, (graph, start, end, ant_count, costs, times, graph_num, gen_num))
     elif test_name == "ph_evap":
       for ph_evap_coef in test_range:
-        pool.apply_async(evap_test, (graph, start, end, ph_evap_coef, costs, times, gnum))
+        pool.apply_async(evap_test, (graph, start, end, ph_evap_coef, costs, times, graph_num))
       
   pool.close()
   pool.join()

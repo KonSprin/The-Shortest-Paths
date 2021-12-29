@@ -42,21 +42,32 @@ def dumps2data(inname, outname):
 # dumps2data("dumps/ant_count-05-12--23-45-57.json", fname)
 # merge_files("dumps/ph_evap-06-12--22-16-47.json", "dumps/ph_evap-06-12--22-30-15.json", "dumps/ph_evap_merged.json")
 
-with open("dumps/ph_evap-07-12--00-00-20.json") as json_file:
+with open("dumps/AS/ph_evap-28-12--21-49-53.json") as json_file:
   data = json.load(json_file)
+  
+with open("dumps/AS/ph_evap-29-12--09-04-59.json") as json_file:
+  data2 = json.load(json_file)
   
 params = data["params"]
 r = params["range"]
 gnum = params["Graphs"]
 
-test_range = np.arange(0.05, 0.15, 0.01)
+# test_range = np.arange(0.05, 0.19, 0.01)
+test_range = range(5,35)
 # ax.plot([1, 2, 3, 4], [1, 4, 2, 3])  # Plot some data on the axes.
 costs = []
 times = []
 cvt = []
-for i in range(5,15):
-  i = i/100
+for i in range(5,25):
+  # i = i/100
   val = data["sum_dict"][str(i)]
+  costs.append(val["cost"]/gnum)
+  times.append(val["time"]/gnum)
+  cvt.append(val["cost"]/val["time"])
+  
+for i in range(25,35):
+  # i = i/100
+  val = data2["sum_dict"][str(i)]
   costs.append(val["cost"]/gnum)
   times.append(val["time"]/gnum)
   cvt.append(val["cost"]/val["time"])
@@ -74,7 +85,7 @@ if False:
 else:
   fig, ax1 = plt.subplots()
   color = 'tab:red'
-  ax1.set_title("Zależność współczynnika wyparowywania dla grafu 50x50")
+  ax1.set_title("Zależność współczynnika wyparowywania dla grafu 100x100")
   ax1.set_xlabel('współczynnik')
   ax1.set_ylabel('średni koszt', color=color)
   ax1.plot(t, costs, color=color)
