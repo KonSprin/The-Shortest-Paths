@@ -28,15 +28,15 @@ if __name__ == '__main__':
   
   size = 100
   offset = 00
-  N = 100
+  N = 500
 
   costs = manager.dict()
   times = manager.dict()
   all_dict = {0: {"cost": 0, "time": 0}}
   
-  algorithm = Astar
+  algorithm = dijkstra
   
-  heuristic = diag_dist2
+  heuristic = diag_dist_k
   
   params = {'size': size, "Graphs": N, "offset": offset, 
             "algorithm": algorithm.__name__, "heuristic": heuristic.__name__}
@@ -45,8 +45,8 @@ if __name__ == '__main__':
     graph = ig.load(f"graphs/simulations/{size}x{size}/graph_{gnum}.graphml")
     start = int(graph["start"])
     end = int(graph["end"])
-
-    # pool.apply_async(test, (graph, start, end, costs, times, gnum, algorithm, heuristic))
+    
+    # pool.apply_async(test, (graph, start, end, costs, times, gnum, algorithm, heuristic, k))
     pool.apply_async(test, (graph, start, end, costs, times, gnum, algorithm))
     
   pool.close()

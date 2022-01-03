@@ -124,14 +124,14 @@ def diag_dist(start, goal, width):
     return 0.4*dy + dx
   return 0.4*dx + dy
 
-def diag_dist2(start, goal, width):
+def diag_dist_k(start, goal, width, k):
   start_x, start_y = vid2wh(start, width)
   goal_x, goal_y = vid2wh(goal, width)
   dx = abs(start_x - goal_x)
   dy = abs(start_y - goal_y)
   if dx > dy:
-    return dy + 2*dx
-  return dx + 2*dy
+    return (0.4*dy + dx) * k
+  return (0.4*dx + dy) * k
 
 def diag_dist10(start, goal, width):
   start_x, start_y = vid2wh(start, width)
@@ -461,7 +461,7 @@ def Astar(g, start, end):
         if v not in opened:
           opened.append(v)
 
-def Astar_heuristic(g, start, end, heuristic):
+def Astar_heuristic(g, start, end, heuristic, k = None):
   """[summary]
 
   Args:
@@ -484,8 +484,10 @@ def Astar_heuristic(g, start, end, heuristic):
   dist[start] = 0
 
   fscore = [float("inf")] * vn
-  fscore[start] = heuristic(start, end, g["width"]) * (1+p)
-
+  if k is not None:
+    fscore[start] = heuristic(start, end, g["width"], k) * (1+p)
+  else: 
+    fscore[start] = heuristic(start, end, g["width"]) * (1+p)
   while len(opened) > 0:
     # tmp_dist = fscore.copy()
     # for q in closed:
@@ -506,7 +508,10 @@ def Astar_heuristic(g, start, end, heuristic):
       alt = dist[u] + g.es(eid)["weight"][0]
       if alt < dist[v]:
         dist[v] = alt
-        fscore[v] = alt + heuristic(v, end, g["width"]) * (1+p)
+        if k is not None:
+          fscore[v] = alt + heuristic(v, end, g["width"], k) * (1+p)
+        else:
+          fscore[v] = alt + heuristic(v, end, g["width"]) * (1+p)
         previus[v] = u
         if v not in opened:
           opened.append(v)
