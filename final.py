@@ -26,15 +26,15 @@ if __name__ == '__main__':
   pool = multiprocessing.Pool(8)
   manager = multiprocessing.Manager()
   
-  size = 100
+  size = 300
   offset = 00
-  N = 500
+  N = 30
 
   costs = manager.dict()
   times = manager.dict()
   all_dict = {0: {"cost": 0, "time": 0}}
   
-  algorithm = dijkstra
+  algorithm = Astar
   
   heuristic = diag_dist_k
   

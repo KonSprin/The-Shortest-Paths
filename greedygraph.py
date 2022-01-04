@@ -94,7 +94,7 @@ else:
   update_frame(width, step, end ,img, 'r')
       
   cv2.imshow('frame', np.uint8(img))
-  cv2.imwrite(f"visualizations/random_path.png", np.uint8(img))
+  cv2.imwrite(f"visualizations/random_path1.png", np.uint8(img))
   if cv2.waitKey(0) == ord('q'):
     cv2.destroyAllWindows()
     
@@ -105,6 +105,6 @@ else:
   update_frame(width, step, end ,img, 'r')
       
   cv2.imshow('frame', np.uint8(img))
-  cv2.imwrite(f"visualizations/random_path_removed.png", np.uint8(img))
+  cv2.imwrite(f"visualizations/random_path_removed1.png", np.uint8(img))
   if cv2.waitKey(0) == ord('q'):
     cv2.destroyAllWindows()

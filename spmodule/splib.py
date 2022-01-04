@@ -434,7 +434,7 @@ def Astar(g, start, end):
   dist[start] = 0
 
   fscore = [float("inf")] * vn
-  fscore[start] = diag_dist(start, end, g["width"]) * (1+p)
+  fscore[start] = diag_dist_k(start, end, g["width"], 2) * (1+p)
 
   while len(opened) > 0:
     # tmp_dist = fscore.copy()
@@ -456,7 +456,7 @@ def Astar(g, start, end):
       alt = dist[u] + g.es(eid)["weight"][0]
       if alt < dist[v]:
         dist[v] = alt
-        fscore[v] = alt + diag_dist(v, end, g["width"]) * (1+p)
+        fscore[v] = alt + diag_dist_k(v, end, g["width"], 2) * (1+p)
         previus[v] = u
         if v not in opened:
           opened.append(v)
