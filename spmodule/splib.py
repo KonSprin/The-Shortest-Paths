@@ -376,7 +376,7 @@ def bellfo(g, start, end):
 def dijkstra(graph, start, end):
   vn = graph.vcount()
   dist = [float("inf")] * vn
-  previus = [[]] * vn
+  previous = [[]] * vn
 
   opened = list(range(vn))
   
@@ -392,22 +392,22 @@ def dijkstra(graph, start, end):
     opened.remove(u)
     closed.append(u)
     
-    if u == end: return reconstruct_path(start, end, previus)
+    if u == end: return reconstruct_path(start, end, previous)
     
     for v in graph.neighbors(u):
       eid = graph.get_eid(u, v)
       alt = dist[u] + graph.es(eid)["weight"][0]
       if alt < dist[v]:
         dist[v] = alt
-        previus[v] = u
+        previous[v] = u
 
-  return reconstruct_path(start, end, previus)
+  return reconstruct_path(start, end, previous)
 
 
-def reconstruct_path(start, end, previus):
+def reconstruct_path(start, end, previous):
   path = [end]
   while path[-1] != start:
-    path.append(previus[path[-1]])
+    path.append(previous[path[-1]])
   path.reverse()
   return path
 
@@ -425,7 +425,7 @@ def Astar(g, start, end):
   vn = g.vcount()
   p = 2/vn
   
-  previus = [[]] * vn
+  previous = [[]] * vn
 
   opened = [start]
   closed = []
@@ -447,7 +447,7 @@ def Astar(g, start, end):
     u = tmp_dist.index(min(tmp_dist))
     
     if u == end:
-      return reconstruct_path(start, u, previus)
+      return reconstruct_path(start, u, previous)
 
     closed.append(u)
     opened.remove(u)
@@ -457,7 +457,7 @@ def Astar(g, start, end):
       if alt < dist[v]:
         dist[v] = alt
         fscore[v] = alt + diag_dist_k(v, end, g["width"], 2) * (1+p)
-        previus[v] = u
+        previous[v] = u
         if v not in opened:
           opened.append(v)
 
@@ -475,7 +475,7 @@ def Astar_heuristic(g, start, end, heuristic, k = None):
   vn = g.vcount()
   p = 2/vn
   
-  previus = [[]] * vn
+  previous = [[]] * vn
 
   opened = [start]
   closed = []
@@ -499,7 +499,7 @@ def Astar_heuristic(g, start, end, heuristic, k = None):
     u = tmp_dist.index(min(tmp_dist))
     
     if u == end:
-      return reconstruct_path(start, u, previus)
+      return reconstruct_path(start, u, previous)
 
     closed.append(u)
     opened.remove(u)
@@ -512,13 +512,13 @@ def Astar_heuristic(g, start, end, heuristic, k = None):
           fscore[v] = alt + heuristic(v, end, g["width"], k) * (1+p)
         else:
           fscore[v] = alt + heuristic(v, end, g["width"]) * (1+p)
-        previus[v] = u
+        previous[v] = u
         if v not in opened:
           opened.append(v)
           
 def bestfirst(g, start, end):
   vn = g.vcount()
-  previus = [[]] * vn
+  previous = [[]] * vn
 
   opened_list = [start]
   
@@ -535,14 +535,14 @@ def bestfirst(g, start, end):
     u = tmp_dist.index(min(tmp_dist))
     
     if u == end:
-      return reconstruct_path(start, u, previus)
+      return reconstruct_path(start, u, previous)
 
     opened_list.remove(u)
     for v in g.neighbors(u):
       alt = diag_dist(v, end, g["width"])
       if alt < dist[v]:
         dist[v] = alt
-        previus[v] = u
+        previous[v] = u
         if v not in opened_list:
           opened_list.append(v)
 
