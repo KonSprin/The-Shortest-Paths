@@ -14,12 +14,12 @@ log.captureWarnings(True)
 
 # %%
 if True:
-  width = 60
-  height = 40
-  step = 16
+  width = 100
+  height = 100
+  step = 10
 
-  start = wh2vid(0,0, width)
-  end =  wh2vid(59,39, width)
+  start = wh2vid(5,5, width)
+  end =  wh2vid(95,95, width)
 
   no_mountains = 6
   mountain_height = 15
@@ -27,15 +27,15 @@ if True:
   graph, img = generate_weighted_graph(width, height, step, start, end, mountain_height, wall_percent)
 
 else: 
-  width = 30
-  height = 20
-  step = 32
-  start = wh2vid(0,0, width)
-  end =  wh2vid(29,19, width)
+  size = 100
+  step = 10
+  start = wh2vid(0,0, size)
+  end =  wh2vid(29,19, size)
   
-  graph = ig.load("graphs/example.graphml")
-  with open("graphs/example.npy", "rb") as f:
-    img = np.load(f)
+  graph = ig.load(f"graphs/simulations/{size}x{size}/graph_{1}.graphml")
+  start = int(graph["start"])
+  end = int(graph["end"])
+    
 # ig.save(graph, "graphs/basic.graphml")
 
 
@@ -102,8 +102,52 @@ else:
 # print(len(image_list))
 # imageio.mimsave('graphs/a_star2.gif', image_list, fps=30)
   
+djpath = dijkstra(graph, start, end)
+djimg = img.copy()
+for v in djpath:
+   update_frame(width, step, v , djimg, 'b')
+  
+aspath = Astar(graph, start, end)
+asimg = img.copy()
+for v in aspath:
+   update_frame(width, step, v , asimg, 'b')
+  
+apath = antss(graph, start, end)
+aimg = img.copy()
+for v in apath:
+   update_frame(width, step, v , aimg, 'b')
+  
+bspath = bestfirst(graph, start, end)
+bsimg = img.copy()
+for v in bspath:
+   update_frame(width, step, v , bsimg, 'b')
+  
+  
 cv2.imshow('frame', np.uint8(img))
-
 if cv2.waitKey(0) == ord('q'):
   cv2.destroyAllWindows()
-# %%
+  
+cv2.imshow('frame', np.uint8(djimg))
+if cv2.waitKey(0) == ord('q'):
+  cv2.destroyAllWindows()
+  
+cv2.imshow('frame', np.uint8(asimg))
+if cv2.waitKey(0) == ord('q'):
+  cv2.destroyAllWindows()
+  
+cv2.imshow('frame', np.uint8(aimg))
+if cv2.waitKey(0) == ord('q'):
+  cv2.destroyAllWindows()
+
+cv2.imshow('frame', np.uint8(bsimg))
+if cv2.waitKey(0) == ord('q'):
+  cv2.destroyAllWindows()
+  
+  
+cv2.imwrite(f"visualizations/no_path.png", np.uint8(img))
+cv2.imwrite(f"visualizations/dijkstra_path.png", np.uint8(djimg))
+cv2.imwrite(f"visualizations/astar_path.png", np.uint8(asimg))
+cv2.imwrite(f"visualizations/ants_path.png", np.uint8(aimg))
+cv2.imwrite(f"visualizations/bestfirst_path.png", np.uint8(bsimg))
+
+  # %%
