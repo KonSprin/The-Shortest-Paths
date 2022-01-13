@@ -26,9 +26,9 @@ if __name__ == '__main__':
   pool = multiprocessing.Pool(8)
   manager = multiprocessing.Manager()
   
-  size = 300
-  offset = 00
-  N = 30
+  size = 100
+  offset = 500
+  N = 500
 
   costs = manager.dict()
   times = manager.dict()
@@ -39,7 +39,7 @@ if __name__ == '__main__':
   heuristic = diag_dist_k
   
   params = {'size': size, "Graphs": N, "offset": offset, 
-            "algorithm": algorithm.__name__, "heuristic": heuristic.__name__}
+            "algorithm": algorithm.__name__, "heuristic": "diag_dist2"}
   
   for gnum in range(offset, offset + N):
     graph = ig.load(f"graphs/simulations/{size}x{size}/graph_{gnum}.graphml")
