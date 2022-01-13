@@ -150,4 +150,3 @@ cv2.imwrite(f"visualizations/astar_path.png", np.uint8(asimg))
 cv2.imwrite(f"visualizations/ants_path.png", np.uint8(aimg))
 cv2.imwrite(f"visualizations/bestfirst_path.png", np.uint8(bsimg))
 
-  # %%
